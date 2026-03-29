@@ -1,5 +1,4 @@
--- c
-
+-- Linoria Rewrited
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -3198,7 +3197,7 @@ function Library:CreateWindow(...)
         local TabButton = Library:Create('Frame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
-            Size = UDim2.new(0, TabButtonWidth + 20, 1, 0);
+            Size = UDim2.new(1, 0, 1, 0); 
             ZIndex = 1;
             Parent = TabArea;
         });
@@ -3516,7 +3515,23 @@ function Library:CreateWindow(...)
             Tab:ShowTab();
         end;
 
+        Tab.Button = TabButton;
+
         table.insert(Window.Tabs, Tab);
+
+        local function ResizeTabs()
+            local TabCount = #Window.Tabs
+            for _, T in next, Window.Tabs do
+                T.Button.Size = UDim2.new(1 / TabCount, 0, 1, 0)
+            end
+        end
+
+        ResizeTabs();
+
+        if #Window.Tabs == 1 then
+            Tab:ShowTab();
+        end;
+
         return Tab;
     end;
 
