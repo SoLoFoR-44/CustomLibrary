@@ -1,4 +1,5 @@
 -- Linoria Rewrited
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -3140,7 +3141,7 @@ function Library:CreateWindow(...)
 
     local MainSectionInner = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
-        BorderColor3 = Color3.new(0, 0, 0);
+        BorderColor3 = Color3.new(6, 2, 9);
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 1, 0);
@@ -3153,11 +3154,12 @@ function Library:CreateWindow(...)
     });
 
     local TabArea = Library:Create('Frame', {
+        Name = 'TabArea';
         BackgroundTransparency = 1;
-        Position = UDim2.new(0, 8, 0, 8);
-        Size = UDim2.new(1, -16, 0, 21);
-        ZIndex = 1;
-        Parent = MainSectionInner;
+        Position = UDim2.new(0, 1, 0, 0); 
+        Size = UDim2.new(1, -2, 0, 21); 
+        ZIndex = 10;
+        Parent = MainSectionInner; 
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
