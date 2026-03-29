@@ -3156,9 +3156,10 @@ function Library:CreateWindow(...)
     local TabArea = Library:Create('Frame', {
         Name = 'TabArea';
         BackgroundTransparency = 1;
-        Position = UDim2.new(0, 0, 0, 0); 
-        Size = UDim2.new(1, 0, 0, 21); 
-        Parent = MainSectionInner;
+        Position = UDim2.new(0, 1, 0, 0); 
+        Size = UDim2.new(1, -2, 0, 21); 
+        ZIndex = 10;
+        Parent = MainSectionInner; 
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
