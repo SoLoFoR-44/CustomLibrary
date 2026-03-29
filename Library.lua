@@ -1,5 +1,4 @@
 -- Linoria Rewrited
-
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -36,7 +35,7 @@ local Library = {
     BackgroundColor = Color3.fromRGB(8, 8, 8);
     AccentColor = Color3.fromRGB(152, 99, 203);
     OutlineColor = Color3.fromRGB(0, 0, 0);
-    RiskColor = Color3.fromRGB(152, 99, 203);
+    RiskColor = Color3.fromRGB(255, 0, 255);
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Code;
@@ -3154,12 +3153,11 @@ function Library:CreateWindow(...)
     });
 
     local TabArea = Library:Create('Frame', {
-        Name = 'TabArea';
         BackgroundTransparency = 1;
-        Position = UDim2.new(0, 1, 0, 0); 
-        Size = UDim2.new(1, -2, 0, 21); 
-        ZIndex = 10;
-        Parent = MainSectionInner; 
+        Position = UDim2.new(0, 8, 0, 8);
+        Size = UDim2.new(1, -16, 0, 21);
+        ZIndex = 1;
+        Parent = MainSectionInner;
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
