@@ -3158,7 +3158,7 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0, 10, 0, 21);
         Size = UDim2.new(1, -20, 0, 21);
         ZIndex = 1;
-        Parent = Main;
+        Parent = MainSectionInner;
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
