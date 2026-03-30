@@ -3220,8 +3220,8 @@ function Library:CreateWindow(...)
         local Highlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, 0);
-            Size = UDim2.new(1, 0, 0, 2);
+            Position = UDim2.new(0, 3, 1, -1);
+            Size = UDim2.new(1, -6, 0, 2);
             Visible = false;
             ZIndex = 3;
             Parent = TabButton;
@@ -3527,11 +3527,15 @@ function Library:CreateWindow(...)
 
         local function ResizeTabs()
             local TabCount = #Window.Tabs
-            for _, T in next, Window.Tabs do
-                T.Button.Size = UDim2.new(1 / TabCount, 0, 1, 0)
+            for i, T in next, Window.Tabs do
+                if i == TabCount then
+                    T.Button.Size = UDim2.new(1 - ((1 / TabCount) * (TabCount - 1)), 0, 1, 0)
+                else
+                    T.Button.Size = UDim2.new(1 / TabCount, 0, 1, 0)
+                end
             end
         end
-
+        
         ResizeTabs();
 
         if #Window.Tabs == 1 then
