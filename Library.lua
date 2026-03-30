@@ -3167,10 +3167,9 @@ function Library:CreateWindow(...)
     })
 
     local TabListLayout = Library:Create('UIListLayout', {
-        Padding = UDim.new(0, Config.TabPadding);
+        Padding = UDim.new(0, 4);
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
-        HorizontalAlignment = Enum.HorizontalAlignment.Center;
         Parent = TabArea;
     });
 
@@ -3218,12 +3217,10 @@ function Library:CreateWindow(...)
         });
 
         local Highlight = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 3, 1, -1);
-            Size = UDim2.new(1, -6, 0, 2);
-            Visible = false;
-            ZIndex = 3;
+            BackgroundColor3 = Library.AccentColor,
+            Size = UDim2.new(1, -10, 0, 2), 
+            Position = UDim2.new(0, 5, 1, -1), 
+            ZIndex = 5,
             Parent = TabButton;
         });
 
@@ -3527,15 +3524,14 @@ function Library:CreateWindow(...)
 
         local function ResizeTabs()
             local TabCount = #Window.Tabs
-            for i, T in next, Window.Tabs do
-                if i == TabCount then
-                    T.Button.Size = UDim2.new(1 - ((1 / TabCount) * (TabCount - 1)), 0, 1, 0)
-                else
-                    T.Button.Size = UDim2.new(1 / TabCount, 0, 1, 0)
-                end
+            local Spacing = 4
+            local TotalSpacing = Spacing * (TabCount - 1)
+    
+            for _, T in next, Window.Tabs do
+                T.Button.Size = UDim2.new(1 / TabCount, -(TotalSpacing / TabCount), 1, 0)
             end
         end
-        
+
         ResizeTabs();
 
         if #Window.Tabs == 1 then
