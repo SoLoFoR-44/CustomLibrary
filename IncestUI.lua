@@ -3558,7 +3558,7 @@ function Library:CreateWindow(...)
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
-            if not Desc:IsDescendantOf(Outer) then
+            if not Desc:IsDescendantOf(ScreenGui) then
                 continue
             end
 
@@ -3588,8 +3588,12 @@ function Library:CreateWindow(...)
 
             for _, Prop in next, Properties do
                 if not Cache[Prop] then
-                    Cache[Prop] = Desc[Prop];
-                end;
+                    local success, value = pcall(function()
+                        return Desc[Prop]
+                    end)
+
+                    Cache[Prop] = success and value or 0
+                end
 
                 if Cache[Prop] == 1 then
                     continue;
