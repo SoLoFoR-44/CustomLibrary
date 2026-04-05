@@ -31,7 +31,7 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    FontColorDark = Color3.fromRGB(180, 180, 180);
+    FontColorDark = Color3.fromRGB(180, 180, 180)
     MainColor = Color3.fromRGB(8, 8, 8);
     BackgroundColor = Color3.fromRGB(8, 8, 8);
     AccentColor = Color3.fromRGB(152, 99, 203);
@@ -3558,12 +3558,20 @@ function Library:CreateWindow(...)
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
+            if not Desc:IsDescendantOf(Outer) then
+                continue
+            end
+
+            if not Desc:IsA("GuiObject") and not Desc:IsA("UIStroke") then
+                continue
+            end
+
             local Properties = {};
 
             if Desc:IsA('ImageLabel') then
                 table.insert(Properties, 'ImageTransparency');
                 table.insert(Properties, 'BackgroundTransparency');
-            elseif Desc:IsA('TextLabel') or Desc:IsA('TextBox') then
+            elseif Desc:IsA('TextLabel') or Desc:IsA('TextBox') or Desc:IsA('TextButton') then
                 table.insert(Properties, 'TextTransparency');
             elseif Desc:IsA('Frame') or Desc:IsA('ScrollingFrame') then
                 table.insert(Properties, 'BackgroundTransparency');
@@ -3587,7 +3595,11 @@ function Library:CreateWindow(...)
                     continue;
                 end;
 
-                TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { [Prop] = Toggled and Cache[Prop] or 1 }):Play();
+                pcall(function()
+                    TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), {
+                        [Prop] = Toggled and Cache[Prop] or 1
+                    }):Play();
+                end)
             end;
         end;
 
