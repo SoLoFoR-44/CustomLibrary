@@ -30,7 +30,6 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    FontColorDark = Color3.fromRGB(180, 180, 180);
     MainColor = Color3.fromRGB(8, 8, 8);
     BackgroundColor = Color3.fromRGB(8, 8, 8);
     AccentColor = Color3.fromRGB(152, 99, 203);
@@ -2902,7 +2901,6 @@ function Library:Notify(Text, Time)
     end);
 end;
 
-
 function Library:CreateWindow(...)
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
@@ -2928,7 +2926,6 @@ function Library:CreateWindow(...)
 
     local Window = {
         Tabs = {};
-        TabButtons = {};
     };
 
     local Outer = Library:Create('Frame', {
@@ -2987,7 +2984,6 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Color3.new(0, 0, 0);
         BorderMode = Enum.BorderMode.Inset;
-        ClipsDescendants = true;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 1;
@@ -2999,32 +2995,28 @@ function Library:CreateWindow(...)
     });
 
     local TabArea = Library:Create('Frame', {
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        BorderColor3 = Library.OutlineColor,
-        BorderMode = Enum.BorderMode.Outline,
-        Position = UDim2.new(0,0,0,0),
-        Size = UDim2.new(1,0,0,28),
-        Parent = MainSectionInner
-    })
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 8, 0, 8);
+        Size = UDim2.new(1, -16, 0, 21);
+        ZIndex = 1;
+        Parent = MainSectionInner;
+    });
 
     local TabListLayout = Library:Create('UIListLayout', {
-        FillDirection = Enum.FillDirection.Horizontal,
-        HorizontalAlignment = Enum.HorizontalAlignment.Left,
-        Padding = UDim.new(0, Config.TabPadding),
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Parent = TabArea
-    })
+        Padding = UDim.new(0, Config.TabPadding);
+        FillDirection = Enum.FillDirection.Horizontal;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Parent = TabArea;
+    });
 
     local TabContainer = Library:Create('Frame', {
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundColor3 = Library.BackgroundColor,
-        BorderColor3 = Library.OutlineColor,
-        ClipsDescendants = true;
-        Position = UDim2.new(0.5, 0, 0.5, 14),
-        Size = UDim2.new(1, 0, 1, -30),
-        Parent = MainSectionInner
-    })
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 8, 0, 30);
+        Size = UDim2.new(1, -16, 1, -38);
+        ZIndex = 2;
+        Parent = MainSectionInner;
+    });
     
 
     Library:AddToRegistry(TabContainer, {
@@ -3045,18 +3037,12 @@ function Library:CreateWindow(...)
         local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
 
         local TabButton = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor,
-            BorderColor3 = Library.OutlineColor,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, TabButtonWidth + 16, 1, 0),
-            Parent = TabArea
-        })
-
-        table.insert(Window.TabButtons, TabButton)
-
-        for _, v in ipairs(Window.TabButtons) do
-            v.Size = UDim2.new(1 / #Window.TabButtons, -Config.TabPadding, 1, 0)
-        end
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
+            ZIndex = 1;
+            Parent = TabArea;
+        });
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
@@ -3072,14 +3058,14 @@ function Library:CreateWindow(...)
         });
 
         local Blocker = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor,
-            BorderSizePixel = 0,
-            Position = UDim2.new(0,0,1,0),
-            Size = UDim2.new(1,0,0,2),
-            BackgroundTransparency = 1,
-            ZIndex = 3,
-            Parent = TabButton
-        })
+            BackgroundColor3 = Library.MainColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 1, 0);
+            Size = UDim2.new(1, 0, 0, 1);
+            BackgroundTransparency = 1;
+            ZIndex = 3;
+            Parent = TabButton;
+        });
 
         Library:AddToRegistry(Blocker, {
             BackgroundColor3 = 'MainColor';
@@ -3098,8 +3084,8 @@ function Library:CreateWindow(...)
         local LeftSide = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 8, 0, 8)
-            Size = UDim2.new(0.5, -12, 0, 507)
+            Position = UDim2.new(0, 8 - 1, 0, 8 - 1);
+            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
@@ -3149,41 +3135,22 @@ function Library:CreateWindow(...)
             end;
 
             Blocker.BackgroundTransparency = 0;
-
-            TabButton.BackgroundColor3 = Library.MainColor
-            TabButtonLabel.TextColor3 = Library.AccentColor
-
-            if Library.RegistryMap[TabButton] then
-                Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor'
-            end
-
-            if Library.RegistryMap[TabButtonLabel] then
-                Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor'
-            end
-
-            TabFrame.Visible = true
-        end
+            TabButton.BackgroundColor3 = Library.MainColor;
+            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            TabFrame.Visible = true;
+        end;
 
         function Tab:HideTab()
             Blocker.BackgroundTransparency = 1;
-
-            TabButton.BackgroundColor3 = Library.BackgroundColor
-            TabButtonLabel.TextColor3 = Library.FontColorDark
-
-            if Library.RegistryMap[TabButton] then
-                Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor'
-            end
-
-            if Library.RegistryMap[TabButtonLabel] then
-                Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColorDark'
-            end
-
-            TabFrame.Visible = false
-        end
+            TabButton.BackgroundColor3 = Library.BackgroundColor;
+            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
+            TabFrame.Visible = false;
+        end;
 
         function Tab:SetLayoutOrder(Position)
-            TabButton.LayoutOrder = Position
-        end
+            TabButton.LayoutOrder = Position;
+            TabListLayout:ApplyLayout();
+        end;
 
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
@@ -3485,9 +3452,9 @@ function Library:CreateWindow(...)
             end;
         end);
 
-        if #Window.TabButtons == 1 then
-            Tab:ShowTab()
-        end
+        if #TabContainer:GetChildren() == 1 then
+            Tab:ShowTab();
+        end;
 
         Window.Tabs[Name] = Tab;
         return Tab;
@@ -3559,20 +3526,12 @@ function Library:CreateWindow(...)
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
-            if not Desc:IsDescendantOf(ScreenGui) then
-                continue
-            end
-
-            if not Desc:IsA("GuiObject") and not Desc:IsA("UIStroke") then
-                continue
-            end
-
             local Properties = {};
 
             if Desc:IsA('ImageLabel') then
                 table.insert(Properties, 'ImageTransparency');
                 table.insert(Properties, 'BackgroundTransparency');
-            elseif Desc:IsA('TextLabel') or Desc:IsA('TextBox') or Desc:IsA('TextButton') then
+            elseif Desc:IsA('TextLabel') or Desc:IsA('TextBox') then
                 table.insert(Properties, 'TextTransparency');
             elseif Desc:IsA('Frame') or Desc:IsA('ScrollingFrame') then
                 table.insert(Properties, 'BackgroundTransparency');
@@ -3589,22 +3548,14 @@ function Library:CreateWindow(...)
 
             for _, Prop in next, Properties do
                 if not Cache[Prop] then
-                    local success, value = pcall(function()
-                        return Desc[Prop]
-                    end)
-
-                    Cache[Prop] = success and value or 0
-                end
+                    Cache[Prop] = Desc[Prop];
+                end;
 
                 if Cache[Prop] == 1 then
                     continue;
                 end;
 
-                pcall(function()
-                    TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), {
-                        [Prop] = Toggled and Cache[Prop] or 1
-                    }):Play();
-                end)
+                TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { [Prop] = Toggled and Cache[Prop] or 1 }):Play();
             end;
         end;
 
