@@ -2905,8 +2905,9 @@ function Library:CreateWindow(...)
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
 
-    if type(Arguments[1]) == 'table' then
-        Config = Arguments[1]
+    if type(...) == 'table' then
+        Config = ...;
+    else
         Config.Title = Arguments[1]
         Config.AutoShow = Arguments[2] or false;
     end
