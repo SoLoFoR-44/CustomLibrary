@@ -2988,6 +2988,7 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Color3.new(0, 0, 0);
         BorderMode = Enum.BorderMode.Inset;
+        ClipsDescendants = true;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 1;
@@ -3000,7 +3001,7 @@ function Library:CreateWindow(...)
 
     local TabArea = Library:Create('Frame', {
         BackgroundTransparency = 0,
-        BorderSizePixel = 1,
+        BorderSizePixel = 0,
         BorderColor3 = Library.OutlineColor,
         BorderMode = Enum.BorderMode.Outline,
         Position = UDim2.new(0,0,0,0),
@@ -3020,6 +3021,7 @@ function Library:CreateWindow(...)
         AnchorPoint = Vector2.new(0.5, 0.5),
         BackgroundColor3 = Library.BackgroundColor,
         BorderColor3 = Library.OutlineColor,
+        ClipsDescendants = true;
         Position = UDim2.new(0.5, 0, 0.5, 14),
         Size = UDim2.new(1, 0, 1, -30),
         Parent = MainSectionInner
@@ -3046,7 +3048,7 @@ function Library:CreateWindow(...)
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor,
             BorderColor3 = Library.OutlineColor,
-            BorderSizePixel = 1,
+            BorderSizePixel = 0,
             Size = UDim2.new(0, TabButtonWidth + 16, 1, 0),
             Parent = TabArea
         })
@@ -3097,8 +3099,8 @@ function Library:CreateWindow(...)
         local LeftSide = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 8 - 1, 0, 8 - 1);
-            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            Position = UDim2.new(0, 8, 0, 8)
+            Size = UDim2.new(0.5, -12, 0, 507)
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
