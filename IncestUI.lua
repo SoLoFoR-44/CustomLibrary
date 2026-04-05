@@ -1,3 +1,4 @@
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -30,6 +31,7 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
+    DarkFontColor = Color3.fromRGB(145, 145, 145);
     MainColor = Color3.fromRGB(8, 8, 8);
     BackgroundColor = Color3.fromRGB(8, 8, 8);
     AccentColor = Color3.fromRGB(152, 99, 203);
@@ -2901,6 +2903,7 @@ function Library:Notify(Text, Time)
     end);
 end;
 
+
 function Library:CreateWindow(...)
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
@@ -3017,7 +3020,6 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
-    
 
     Library:AddToRegistry(TabContainer, {
         BackgroundColor3 = 'MainColor';
@@ -3037,38 +3039,36 @@ function Library:CreateWindow(...)
         local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
 
         local TabButton = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
+            BackgroundTransparency = 1;
+            Size = UDim2.new(0, TabButtonWidth + 12, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
-        });
-
-        Library:AddToRegistry(TabButton, {
-            BackgroundColor3 = 'BackgroundColor';
-            BorderColor3 = 'OutlineColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
+            TextColor3 = Library.DarkFontColor; 
             ZIndex = 1;
             Parent = TabButton;
         });
 
-        local Blocker = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor;
+        local TabHighlight = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, 0);
+            Position = UDim2.new(0, 0, 1, -1);
             Size = UDim2.new(1, 0, 0, 1);
-            BackgroundTransparency = 1;
+            Visible = false;
             ZIndex = 3;
             Parent = TabButton;
         });
 
-        Library:AddToRegistry(Blocker, {
-            BackgroundColor3 = 'MainColor';
+        Library:AddToRegistry(TabButtonLabel, {
+            TextColor3 = 'DarkFontColor';
+        });
+        Library:AddToRegistry(TabHighlight, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local TabFrame = Library:Create('Frame', {
@@ -3130,26 +3130,27 @@ function Library:CreateWindow(...)
         end;
 
         function Tab:ShowTab()
-            for _, Tab in next, Window.Tabs do
-                Tab:HideTab();
+            for _, T in next, Window.Tabs do
+                T:HideTab();
             end;
 
-            Blocker.BackgroundTransparency = 0;
-            TabButton.BackgroundColor3 = Library.MainColor;
-            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            TabHighlight.Visible = true;
+            TabButtonLabel.TextColor3 = Library.FontColor;
+            Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
+            
             TabFrame.Visible = true;
         end;
 
         function Tab:HideTab()
-            Blocker.BackgroundTransparency = 1;
-            TabButton.BackgroundColor3 = Library.BackgroundColor;
-            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
+            TabHighlight.Visible = false;
+            TabButtonLabel.TextColor3 = Library.DarkFontColor;
+            Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'DarkFontColor';
+            
             TabFrame.Visible = false;
         end;
 
         function Tab:SetLayoutOrder(Position)
             TabButton.LayoutOrder = Position;
-            TabListLayout:ApplyLayout();
         end;
 
         function Tab:AddGroupbox(Info)
