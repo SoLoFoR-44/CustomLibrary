@@ -3059,7 +3059,7 @@ function Library:CreateWindow(...)
         table.insert(Window.TabButtons, TabButton)
 
         for i, v in next, Window.TabButtons do
-            v.Size = UDim2.new(1 / #Window.TabButtons, -Config.TabPadding, 1, 0)
+            v.Size = UDim2.new(1 / #Window.TabButtons, 0, 1, 0)
         end
 
         Library:AddToRegistry(TabButton, {
