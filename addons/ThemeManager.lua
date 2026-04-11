@@ -5,7 +5,6 @@ local ThemeManager = {} do
 	ThemeManager.Library = nil
 	ThemeManager.BuiltInThemes = {
 		['Default'] = { 1, httpService:JSONDecode('{"FontColor":"ffffff","FontColorDark":"919191","MainColor":"080808","BackgroundColor":"080808","AccentColor":"9863cb","OutlineColor":"000000","RiskColor":"9863cb"}') },
-        ['Amethyst'] = { 2, httpService:JSONDecode('{"FontColor":"ffffff","FontColorDark":"919191","MainColor":"080808","BackgroundColor":"080808","AccentColor":"9863cb","OutlineColor":"000000","RiskColor":"9863cb"}') },
         ['Azure'] = { 3, httpService:JSONDecode('{"FontColor":"ffffff","FontColorDark":"919191","MainColor":"080808","BackgroundColor":"080808","AccentColor":"3a7bff","OutlineColor":"000000","RiskColor":"3a7bff"}') },
         ['Crimson'] = { 4, httpService:JSONDecode('{"FontColor":"ffffff","FontColorDark":"919191","MainColor":"080808","BackgroundColor":"080808","AccentColor":"ff3a3a","OutlineColor":"000000","RiskColor":"ff3a3a"}') },
         ['Emerald'] = { 5, httpService:JSONDecode('{"FontColor":"ffffff","FontColorDark":"919191","MainColor":"080808","BackgroundColor":"080808","AccentColor":"3aff88","OutlineColor":"000000","RiskColor":"3aff88"}') },
