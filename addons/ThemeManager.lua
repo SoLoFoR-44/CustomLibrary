@@ -127,11 +127,11 @@ local ThemeManager = {} do
 			self:ThemeUpdate()
 		end
 
-		Options.BackgroundColor:OnChanged(UpdateTheme)
-		Options.MainColor:OnChanged(UpdateTheme)
-		Options.AccentColor:OnChanged(UpdateTheme)
-		Options.OutlineColor:OnChanged(UpdateTheme)
-		Options.FontColor:OnChanged(UpdateTheme)
+		if Options.BackgroundColor then Options.BackgroundColor:OnChanged(UpdateTheme) end
+        if Options.MainColor then Options.MainColor:OnChanged(UpdateTheme) end
+        if Options.AccentColor then Options.AccentColor:OnChanged(UpdateTheme) end
+        if Options.OutlineColor then Options.OutlineColor:OnChanged(UpdateTheme) end
+        if Options.FontColor then Options.FontColor:OnChanged(UpdateTheme) end
 	end
 
 	function ThemeManager:GetCustomTheme(file)
