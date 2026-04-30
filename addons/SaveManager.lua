@@ -1,7 +1,7 @@
-﻿local httpService = game:GetService('HttpService')
+local httpService = game:GetService('HttpService')
 
 local SaveManager = {} do
-	SaveManager.Folder = 'LinoriaLibSettings'
+	SaveManager.Folder = 'AlwaysLose'
 	SaveManager.Ignore = {}
 	SaveManager.Parser = {
 		Toggle = {
@@ -9,7 +9,7 @@ local SaveManager = {} do
 				return { type = 'Toggle', idx = idx, value = object.Value } 
 			end,
 			Load = function(idx, data)
-				if Toggles[idx] then 
+				if Toggles[idx] and type(data.value) == "boolean" then 
 					Toggles[idx]:SetValue(data.value)
 				end
 			end,
@@ -20,7 +20,10 @@ local SaveManager = {} do
 			end,
 			Load = function(idx, data)
 				if Options[idx] then 
-					Options[idx]:SetValue(tonumber(data.value))
+					local num = tonumber(data.value)
+					if num then
+						Options[idx]:SetValue(num)
+					end
 				end
 			end,
 		},
@@ -29,7 +32,7 @@ local SaveManager = {} do
 				return { type = 'Dropdown', idx = idx, value = object.Value, multi = object.Multi }
 			end,
 			Load = function(idx, data)
-				if Options[idx] then 
+				if Options[idx] and data.value ~= nil then 
 					pcall(function()
 						Options[idx]:SetValue(data.value)
 					end)
@@ -41,10 +44,10 @@ local SaveManager = {} do
 				return { type = 'ColorPicker', idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
 			end,
 			Load = function(idx, data)
-				if Options[idx] then 
+				if Options[idx] and data.value then 
 					local success, color = pcall(Color3.fromHex, data.value)
 					if success then
-						Options[idx]:SetValueRGB(color, data.transparency)
+						Options[idx]:SetValueRGB(color, data.transparency or 0)
 					end
 				end
 			end,
@@ -54,7 +57,7 @@ local SaveManager = {} do
 				return { type = 'KeyPicker', idx = idx, mode = object.Mode, key = object.Value }
 			end,
 			Load = function(idx, data)
-				if Options[idx] then 
+				if Options[idx] and data.key ~= nil and data.mode ~= nil then 
 					Options[idx]:SetValue({
 						Value = data.key,
 						Mode = data.mode
@@ -64,11 +67,11 @@ local SaveManager = {} do
 		},
 		Input = {
 			Save = function(idx, object)
-				return { type = 'Input', idx = idx, text = object.Value }
+				return { type = 'Input', idx = idx, text = object.Value or "" }
 			end,
 			Load = function(idx, data)
-				if Options[idx] and type(data.text) == 'string' then
-					Options[idx]:SetValue(data.text)
+				if Options[idx] then
+					Options[idx]:SetValue(type(data.text) == "string" and data.text or "")
 				end
 			end,
 		},
@@ -130,7 +133,9 @@ local SaveManager = {} do
 
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				self.Parser[option.type].Load(option.idx, option)
+				pcall(function()
+					self.Parser[option.type].Load(option.idx, option)
+				end)
 			end
 		end
 
@@ -206,7 +211,7 @@ local SaveManager = {} do
 
 		local section = tab:AddRightGroupbox('Configuration')
 
-		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' })
+		section:AddInput('SaveManager_ConfigName', { Text = 'Config name' })
 		section:AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
 
 		section:AddDivider()
@@ -214,7 +219,7 @@ local SaveManager = {} do
 		section:AddButton('Create config', function()
 			local name = Options.SaveManager_ConfigName.Value
 
-			if name:gsub(' ', '') == '' then 
+			if not name or name:gsub(' ', '') == '' then 
 				return self.Library:Notify('Invalid config name (empty)', 2)
 			end
 
@@ -256,9 +261,11 @@ local SaveManager = {} do
 
 		section:AddButton('Set as autoload', function()
 			local name = Options.SaveManager_ConfigList.Value
-			writefile(self.Folder .. '/settings/autoload.txt', name)
-			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
-			self.Library:Notify(string.format('Set %q to auto load', name))
+			if name then
+				writefile(self.Folder .. '/settings/autoload.txt', name)
+				SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
+				self.Library:Notify(string.format('Set %q to auto load', name))
+			end
 		end)
 
 		SaveManager.AutoloadLabel = section:AddLabel('Current autoload config: none', true)
