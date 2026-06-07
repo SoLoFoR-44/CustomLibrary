@@ -433,7 +433,7 @@ do
             BorderSizePixel = 0;
             Size = UDim2.new(0, 27, 0, 13);
             ZIndex = 5;
-            Image = 'http://www.roblox.com/asset/?id=12977615774';
+            Image = 'https://raw.githubusercontent.com/SoLoFoR-44/AlwaysLose/refs/heads/main/public/swimdroid.jpg?token=GHSAT0AAAAAADRA4FPFKLM7EF3KMLO2HZSG2RFQQAA';
             Visible = not not Info.Transparency;
             Parent = DisplayFrame;
         });
