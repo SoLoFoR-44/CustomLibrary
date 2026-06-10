@@ -1,3 +1,4 @@
+
 ﻿local httpService = game:GetService('HttpService')
 local ThemeManager = {} do
 	ThemeManager.Folder = 'LinoriaLibSettings'
@@ -18,13 +19,19 @@ local ThemeManager = {} do
 		if not data then return end
 
 		local scheme = data[2]
-		for idx, col in next, customThemeData or scheme do
-			self.Library[idx] = Color3.fromHex(col)
-			
-			if Options[idx] then
-				Options[idx]:SetValueRGB(Color3.fromHex(col))
-			end
-		end
+		for idx, col in next, (customThemeData or scheme) do
+	        if typeof(col) == "string" then
+		        local success, color = pcall(Color3.fromHex, col)
+
+		        if success then
+			        self.Library[idx] = color
+
+			        if Options[idx] then
+				        Options[idx]:SetValueRGB(color)
+			        end
+		        end
+	        end
+        end
 
 		self:ThemeUpdate()
 	end
@@ -58,10 +65,14 @@ local ThemeManager = {} do
 		end
 
 		if isDefault then
-			Options.ThemeManager_ThemeList:SetValue(theme)
-		else
-			self:ApplyTheme(theme)
-		end
+	        Options.ThemeManager_ThemeList:SetValue(theme)
+        else
+	        self:ApplyTheme(theme)
+
+	        if Options.ThemeManager_CustomThemeList then
+		        Options.ThemeManager_CustomThemeList:SetValue(theme)
+	        end
+        end
 	end
 
 	function ThemeManager:SaveDefault(theme)
@@ -134,20 +145,21 @@ local ThemeManager = {} do
 	end
 
 	function ThemeManager:GetCustomTheme(file)
-		local path = self.Folder .. '/themes/' .. file
-		if not isfile(path) then
-			return nil
-		end
+	    local path = self.Folder .. '/themes/' .. file .. '.json'
 
-		local data = readfile(path)
-		local success, decoded = pcall(httpService.JSONDecode, httpService, data)
-		
-		if not success then
-			return nil
-		end
+	    if not isfile(path) then
+		    return nil
+	    end
 
-		return decoded
-	end
+	    local data = readfile(path)
+	    local success, decoded = pcall(httpService.JSONDecode, httpService, data)
+
+	    if not success then
+		    return nil
+	    end
+
+	    return decoded
+    end
 
 	function ThemeManager:SaveCustomTheme(file)
 		if file:gsub(' ', '') == '' then
@@ -155,7 +167,15 @@ local ThemeManager = {} do
 		end
 
 		local theme = {}
-		local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+		local fields = {
+	    "FontColor",
+	    "FontColorDark",
+	    "MainColor",
+	    "AccentColor",
+	    "BackgroundColor",
+	    "OutlineColor",
+	    "RiskColor"
+        }
 
 		for _, field in next, fields do
 			theme[field] = Options[field].Value:ToHex()
@@ -182,7 +202,8 @@ local ThemeManager = {} do
 				end
 
 				if char == '/' or char == '\\' then
-					table.insert(out, file:sub(pos + 1))
+					local name = file:sub(pos + 1, -6)
+                    table.insert(out, name)
 				end
 			end
 		end
