@@ -3176,7 +3176,7 @@ function Library:CreateWindow(...)
     local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0.5, 0, 0.5, 14);
+        Position = UDim2.new(0, 0, 0, 28);
         Size = UDim2.new(1, 0, 1, -30);
         ZIndex = 2;
         Parent = MainSectionInner;
