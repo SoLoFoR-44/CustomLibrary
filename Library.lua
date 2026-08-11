@@ -2161,7 +2161,7 @@ do
 
     -- Внешняя рамка (Контейнер)
         local PreviewFrame = Library:Create('Frame', {
-            BackgroundColor3 = Library.OutlineColor,
+            BackgroundColor3 = Library.OutlineColor or Color3.fromRGB(50, 50, 50),
             BorderSizePixel = 0,
             Size = UDim2.new(1, 0, 0, 0),
             Parent = self.Container
@@ -2169,19 +2169,19 @@ do
 
     -- Внутренняя подложка
         local InnerFrame = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor,
+            BackgroundColor3 = Library.BackgroundColor or Color3.fromRGB(20, 20, 20),
             BorderSizePixel = 0,
             Position = UDim2.new(0, 1, 0, 1),
             Size = UDim2.new(1, -2, 1, -2),
             Parent = PreviewFrame
         })
 
-    -- Градиент для объема
+        -- Градиент для объема
         Library:Create('UIGradient', {
             Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
                 ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-        }),
+            }),
             Rotation = 90,
             Parent = InnerFrame
         })
@@ -2196,7 +2196,7 @@ do
             Parent = InnerFrame
         })
 
-    -- Заголовок превью (если передан Text)
+        -- Заголовок превью (если передан Text)
         local YOffset = 4
         if Info.Text then
             Library:CreateLabel({
@@ -2234,7 +2234,6 @@ do
                 local TotalHeight = YOffset + ImageHeight + 4
                 PreviewFrame.Size = UDim2.new(1, 0, 0, TotalHeight)
             
-                -- Вызываем пересчет размера группы
                 if self.Resize then
                     self:Resize()
                 end
@@ -2263,24 +2262,32 @@ do
             ImageLabel.Image = FormattedUrl
             PreviewModule.Value = FormattedUrl
         end
-
+    
         function PreviewModule:SetVisible(State)
-            PreviewFrame.Visible = State    
+            PreviewFrame.Visible = State
             if self.Groupbox and self.Groupbox.Resize then
                 self.Groupbox:Resize()
             end
         end
 
-        -- Регистрация в опциях
+    -- Безопасная регистрация Flag в Options / Flags
         if Info.Flag then
+            if not Library.Options then Library.Options = {} end
             Library.Options[Info.Flag] = PreviewModule
+
+            if Flags and typeof(Flags) == "table" then
+                Flags[Info.Flag] = PreviewModule
+            end
+            if Options and typeof(Options) == "table" then
+                Options[Info.Flag] = PreviewModule
+            end
         end
 
-        -- Пересчитываем размещение контейнера
+    -- Пересчитываем размещение контейнера
         if self.Resize then
             self:Resize()
         end
-    
+
         return PreviewModule
     end
     -- ULTRA KRUTOI AI SCRIPT END
