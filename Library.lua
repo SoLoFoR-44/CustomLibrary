@@ -2138,7 +2138,7 @@ do
         return Slider;
     end;
 	-- ULTRA KRUTOI AI SCRIPT START
-    	function Funcs:AddPreview(Idx, Info)
+    function Funcs:AddPreview(Idx, Info)
         -- Info = { Text = "Preview", Image = "rbxassetid://...", Ratio = 1.6, Flag = "..." }
         local PreviewModule = {
             Type = 'Preview',
@@ -2158,16 +2158,16 @@ do
                 ImageUrl = getcustomasset(fileName)
             end
         end
-    
-        -- Внешняя рамка (Контейнер)
+
+    -- Внешняя рамка (Контейнер)
         local PreviewFrame = Library:Create('Frame', {
             BackgroundColor3 = Library.OutlineColor,
             BorderSizePixel = 0,
             Size = UDim2.new(1, 0, 0, 0),
             Parent = self.Container
         })
-    
-        -- Внутренняя подложка
+
+    -- Внутренняя подложка
         local InnerFrame = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor,
             BorderSizePixel = 0,
@@ -2175,18 +2175,18 @@ do
             Size = UDim2.new(1, -2, 1, -2),
             Parent = PreviewFrame
         })
-    
-        -- Градиент для объема
+
+    -- Градиент для объема
         Library:Create('UIGradient', {
             Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
                 ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-            }),
+        }),
             Rotation = 90,
             Parent = InnerFrame
         })
-    
-        -- Текстура шахматки (для поддержки прозрачности)
+
+    -- Текстура шахматки (для поддержки прозрачности)
         Library:Create('ImageLabel', {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
@@ -2195,8 +2195,8 @@ do
             TileSize = UDim2.new(0, 12, 0, 12),
             Parent = InnerFrame
         })
-    
-        -- Заголовок превью (если передан Text)
+
+    -- Заголовок превью (если передан Text)
         local YOffset = 4
         if Info.Text then
             Library:CreateLabel({
@@ -2210,11 +2210,11 @@ do
             })
             YOffset = YOffset + 18
         end
-    
-        -- Соотношение сторон картинки (1.6 по умолчанию)
+
+    -- Соотношение сторон картинки (1.6 по умолчанию)
         local AspectRatio = Info.Ratio or 1.6
-    
-        -- Контейнер самого изображения
+
+    -- Контейнер самого изображения
         local ImageLabel = Library:Create('ImageLabel', {
             BackgroundTransparency = 1,
             Position = UDim2.new(0, 4, 0, YOffset),
@@ -2224,7 +2224,7 @@ do
             Parent = InnerFrame
         })
 
-    -- Автоматический расчет высоты под размер Groupbox
+    -- Обновление высоты элемента и пересчет размера всей группы
         local function UpdateSize()
             local Width = PreviewFrame.AbsoluteSize.X - 10
             if Width > 0 then
@@ -2233,19 +2233,24 @@ do
             
                 local TotalHeight = YOffset + ImageHeight + 4
                 PreviewFrame.Size = UDim2.new(1, 0, 0, TotalHeight)
+            
+                -- Вызываем пересчет размера группы
+                if self.Resize then
+                    self:Resize()
+                end
             end
         end
 
         task.defer(UpdateSize)
         PreviewFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateSize)
 
-    -- БЕЗОПАСНАЯ РЕГИСТРАЦИЯ ЦВЕТОВ В РЕЕСТРЕ
+    -- Регистрация цвета в реестре темы (если метод доступен)
         if Library.AddToRegistry then
             Library:AddToRegistry(PreviewFrame, { BackgroundColor3 = 'OutlineColor' })
             Library:AddToRegistry(InnerFrame, { BackgroundColor3 = 'BackgroundColor' })
         end
 
-    -- Методы управления
+    -- Методы управления превью
         function PreviewModule:SetImage(NewImage)
             local FormattedUrl = NewImage
             if FormattedUrl:find("http://") or FormattedUrl:find("https://") then
@@ -2260,17 +2265,22 @@ do
         end
 
         function PreviewModule:SetVisible(State)
-            PreviewFrame.Visible = State
-            self:UpdateGroupbox()
+            PreviewFrame.Visible = State    
+            if self.Groupbox and self.Groupbox.Resize then
+                self.Groupbox:Resize()
+            end
         end
 
-    -- Добавляем в список элементов группы
-        self:AddToGroupbox(PreviewFrame)
-
+        -- Регистрация в опциях
         if Info.Flag then
             Library.Options[Info.Flag] = PreviewModule
         end
 
+        -- Пересчитываем размещение контейнера
+        if self.Resize then
+            self:Resize()
+        end
+    
         return PreviewModule
     end
     -- ULTRA KRUTOI AI SCRIPT END
