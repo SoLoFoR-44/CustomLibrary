@@ -1,3 +1,4 @@
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -2136,7 +2137,142 @@ do
 
         return Slider;
     end;
+	-- ULTRA KRUTOI AI SCRIPT START
+	function Funcs:AddPreview(Idx, Info)
+    -- Info = { Text = "Preview", Image = "rbxassetid://...", Ratio = 1.6, Flag = "..." }
+        local PreviewModule = {
+            Type = 'Preview',
+            Value = Info.Image or '',
+            Default = Info.Image or ''
+        }
 
+        local ImageUrl = Info.Image or ""
+
+    -- Обработка внешних ссылок (например, GitHub / Raw URL)
+        if ImageUrl:find("http://") or ImageUrl:find("https://") then
+            if getcustomasset then
+                local fileName = "preview_cache_" .. (Info.Flag or Idx or "temp") .. ".png"
+                if not isfile(fileName) then
+                    writefile(fileName, game:HttpGet(ImageUrl))
+                end
+                ImageUrl = getcustomasset(fileName)
+            end
+        end
+
+    -- Внешняя рамка (Контейнер)
+        local PreviewFrame = Library:Create('Frame', {
+            BackgroundColor3 = Library.OutlineColor,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 0), -- Высота посчитается автоматически
+            Parent = self.Container
+        })
+
+    -- Внутренняя подложка
+        local InnerFrame = Library:Create('Frame', {
+            BackgroundColor3 = Library.BackgroundColor,
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 1, 0, 1),
+            Size = UDim2.new(1, -2, 1, -2),
+            Parent = PreviewFrame
+        })
+
+    -- Градиент для красоты (как на основных панелях)
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
+            }),
+            Rotation = 90,
+            Parent = InnerFrame
+	    })
+
+    -- Шаблоны/сетка прозрачности (чтобы PNG с альфа-каналом выглядел красиво)
+        local CheckerPattern = Library:Create('ImageLabel', {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Image = 'rbxassetid://4155801252', -- Стандартная текстура шахматки
+            ScaleType = Enum.ScaleType.Tile,
+            TileSize = UDim2.new(0, 12, 0, 12),
+            Parent = InnerFrame
+        })
+
+    -- Заголовок превью (если передан Text)
+        local YOffset = 4
+        if Info.Text then
+            local Label = Library:CreateLabel({
+                Size = UDim2.new(1, -10, 0, 16),
+                Position = UDim2.new(0, 5, 0, 2),
+                Text = Info.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Font = Enum.Font.Code,
+                TextSize = 13,
+                Parent = InnerFrame
+            })
+            YOffset = YOffset + 18
+        end
+
+    -- Соотношение сторон изображения (по умолчанию 16:9 ~ 1.77 или квадрат 1.0)
+        local AspectRatio = Info.Ratio or 1.6
+
+    -- Сам контейнер изображения
+        local ImageLabel = Library:Create('ImageLabel', {
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 4, 0, YOffset),
+            Size = UDim2.new(1, -8, 0, 100), -- Высота скорректируется ниже
+            Image = ImageUrl,
+            ScaleType = Enum.ScaleType.Fit, -- Картинка вписывается без искажения пропорций
+            Parent = InnerFrame
+        })
+
+    -- Динамический расчет высоты под ширину Groupbox
+        local function UpdateSize()
+            local Width = PreviewFrame.AbsoluteSize.X - 10
+            if Width > 0 then
+                local ImageHeight = math.floor(Width / AspectRatio)
+                ImageLabel.Size = UDim2.new(1, -8, 0, ImageHeight)
+            
+                local TotalHeight = YOffset + ImageHeight + 4
+                PreviewFrame.Size = UDim2.new(1, 0, 0, TotalHeight)
+            end
+        end
+
+    -- Обновляем размер при спавне и при изменении размеров меню
+        task.defer(UpdateSize)
+        PreviewFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateSize)
+
+    -- Регистрация цвета рамки в реестре UI
+        Library:RegisterProperty(PreviewFrame, 'BackgroundColor3', 'OutlineColor')
+        Library:RegisterProperty(InnerFrame, 'BackgroundColor3', 'BackgroundColor')
+
+    -- Методы для динамической смены картинки во время работы
+        function PreviewModule:SetImage(NewImage)
+            local FormattedUrl = NewImage
+            if FormattedUrl:find("http://") or FormattedUrl:find("https://") then
+                if getcustomasset then
+                    local fileName = "preview_cache_" .. tick() .. ".png"
+                    writefile(fileName, game:HttpGet(FormattedUrl))
+                    FormattedUrl = getcustomasset(fileName)
+                end
+            end
+        ImageLabel.Image = FormattedUrl
+            PreviewModule.Value = FormattedUrl
+        end
+
+        function PreviewModule:SetVisible(State)
+            PreviewFrame.Visible = State
+            self:UpdateGroupbox()
+        end
+
+    -- Добавляем элемент в реестр фрейма
+        self:AddToGroupbox(PreviewFrame)
+
+        if Info.Flag then
+            Library.Options[Info.Flag] = PreviewModule
+        end
+
+        return PreviewModule
+    end
+    -- ULTRA KRUTOI AI SCRIPT END
     function Funcs:AddDropdown(Idx, Info)
         if Info.SpecialType == 'Player' then
             Info.Values = GetPlayersString();
