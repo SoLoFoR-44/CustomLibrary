@@ -777,14 +777,11 @@ do
 			ContextMenu:AddOption("Copy RGB", function()
 				pcall(
 					setclipboard,
-					table.concat(
-						{
-							math.floor(ColorPicker.Value.R * 255),
-							math.floor(ColorPicker.Value.G * 255),
-							math.floor(ColorPicker.Value.B * 255),
-						},
-						", "
-					)
+					table.concat({
+						math.floor(ColorPicker.Value.R * 255),
+						math.floor(ColorPicker.Value.G * 255),
+						math.floor(ColorPicker.Value.B * 255),
+					}, ", ")
 				)
 				Library:Notify("Copied RGB values to clipboard!", 2)
 			end)
@@ -852,14 +849,11 @@ do
 			HueCursor.Position = UDim2.new(0, 0, ColorPicker.Hue, 0)
 
 			HueBox.Text = "#" .. ColorPicker.Value:ToHex()
-			RgbBox.Text = table.concat(
-				{
-					math.floor(ColorPicker.Value.R * 255),
-					math.floor(ColorPicker.Value.G * 255),
-					math.floor(ColorPicker.Value.B * 255),
-				},
-				", "
-			)
+			RgbBox.Text = table.concat({
+				math.floor(ColorPicker.Value.R * 255),
+				math.floor(ColorPicker.Value.G * 255),
+				math.floor(ColorPicker.Value.B * 255),
+			}, ", ")
 
 			Library:SafeCallback(ColorPicker.Callback, ColorPicker.Value)
 			Library:SafeCallback(ColorPicker.Changed, ColorPicker.Value)
@@ -1160,34 +1154,57 @@ do
 			ModeButtons[Mode] = ModeButton
 		end
 
-		function KeyPicker:Update()
-			if Info.NoUI then
-				return
-			end
+        function KeyPicker:Update()
+            if Info.NoUI then
+                return
+            end
 
-			local State = KeyPicker:GetState()
+            local State = KeyPicker:GetState()
 
-			ContainerLabel.Text = string.format("%s [%s](%s)", Info.Text, KeyPicker.Value, KeyPicker.Mode)
+            -- Если у вас один ContainerLabel, используем его для текста слева (названия)
+            ContainerLabel.Text = Info.Text
+            ContainerLabel.TextXAlignment = Enum.TextXAlignment.Left
+            ContainerLabel.Visible = true
+            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
 
-			ContainerLabel.Visible = true
-			ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+            -- Ищем или создаем второй Label для правой части (бинд + режим)
+            local RightLabel = ContainerLabel:FindFirstChild("RightText")
+            if not RightLabel then
+                RightLabel = Library:CreateLabel({
+                    Active = false,
+                    Size = UDim2.new(1, 0, 1, 0),
+                    Position = UDim2.new(0, 0, 0, 0),
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    TextSize = ContainerLabel.TextSize,
+                    ZIndex = ContainerLabel.ZIndex,
+                    Parent = ContainerLabel,
+                })
+                RightLabel.Name = "RightText"
+            end
 
-			Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
+            -- Форматируем правую часть (клавиша и режим)
+            RightLabel.Text = string.format("[%s] (%s)", KeyPicker.Value, KeyPicker.Mode)
+            RightLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
 
-			local YSize = 0
-			local XSize = 0
+            -- Перерасчет размеров окна кейбиндов
+            local YSize = 0
+            local XSize = 0
 
-			for _, Label in next, Library.KeybindContainer:GetChildren() do
-				if Label:IsA("TextLabel") and Label.Visible then
-					YSize = YSize + 18
-					if Label.TextBounds.X > XSize then
-						XSize = Label.TextBounds.X
-					end
-				end
-			end
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA("TextLabel") and Label.Visible then
+                    YSize = YSize + 18
+                    -- Считаем суммарную ширину обоих текстов с запасом
+                    local TotalWidth = Label.TextBounds.X + (Label:FindFirstChild("RightText") and Label.RightText.TextBounds.X or 0)
+                    if TotalWidth > XSize then
+                        XSize = TotalWidth
+                    end
+                end
+            end
 
-			Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
-		end
+            -- Увеличиваем минимальную ширину (например, до 240 px), чтобы текст по бокам смотрелся красиво
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 30, 240), 0, YSize + 23)
+        end
 
 		function KeyPicker:GetState()
 			if KeyPicker.Mode == "Always" then
