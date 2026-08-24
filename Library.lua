@@ -1125,12 +1125,22 @@ do
             Resize = function() end
         }
 
+        local RealGroupbox = self.Groupbox or (self.Type == "Groupbox" and self) or self
+    
+        local SubGroupbox = setmetatable({
+            Container = Container,
+            AddBlank = function() end,
+            Resize = function() end,
+        }, {
+            __index = RealGroupbox 
+        })
+
         function ConfigGroup:AddToggle(SubIdx, SubInfo)
-            return Funcs.AddToggle(SubGroupbox, SubIdx, SubInfo)
+            return SubGroupbox:AddToggle(SubIdx, SubInfo)
         end
 
         function ConfigGroup:AddSlider(SubIdx, SubInfo)
-            return Funcs.AddSlider(SubGroupbox, SubIdx, SubInfo)
+            return SubGroupbox:AddSlider(SubIdx, SubInfo)
         end
     
         table.insert(ParentObj.Addons, ConfigGroup)
