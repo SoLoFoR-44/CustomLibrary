@@ -1003,6 +1003,133 @@ do
 		return self
 	end
 
+	function Funcs:AddConfigGroup(Idx, Info)
+        local ParentLabel = self.TextLabel
+        Info = Info or {}
+
+        local ConfigGroup = {
+            Type = "ConfigGroup",
+            Title = Info.Title or "Settings",
+            Icon = Info.Icon
+        }
+    
+        local IconBtn = Library:Create("ImageButton", {
+            Name = "ConfigGroupIcon",
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 14, 0, 14),
+            Image = ConfigGroup.Icon,
+            ImageColor3 = Library.FontColor,
+            ZIndex = 6,
+            Parent = ParentLabel,
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -2, 0.5, 0),
+        })
+
+        Library:AddToRegistry(IconBtn, { ImageColor3 = "FontColor" })
+
+        local PopUpOuter = Library:Create("Frame", {
+            Name = "ConfigPopUp",
+            BackgroundColor3 = Color3.new(0, 0, 0),
+            BorderColor3 = Color3.new(0, 0, 0),
+            Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 18),
+            Size = UDim2.fromOffset(200, 0),
+            Visible = false,
+            ZIndex = 15,
+            Parent = ScreenGui,
+        })
+
+        IconBtn:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+            PopUpOuter.Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 18)
+        end)
+
+        local PopUpInner = Library:Create("Frame", {
+            BackgroundColor3 = Library.BackgroundColor,
+            BorderColor3 = Library.OutlineColor,
+            BorderMode = Enum.BorderMode.Inset,
+            Size = UDim2.new(1, 0, 1, 0),
+            ZIndex = 16,
+            Parent = PopUpOuter,
+        })
+
+        local Highlight = Library:Create("Frame", {
+            BackgroundColor3 = Library.AccentColor,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 2),
+            ZIndex = 17,
+            Parent = PopUpInner,
+        })
+
+        local Container = Library:Create("Frame", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(6, 8),
+            Size = UDim2.new(1, -12, 1, -12),
+            ZIndex = 17,
+            Parent = PopUpInner,
+        })
+
+        local Layout = Library:Create("UIListLayout", {
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 6),
+            Parent = Container,
+        })
+
+        Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            PopUpOuter.Size = UDim2.fromOffset(200, Layout.AbsoluteContentSize.Y + 16)
+        end)
+
+        Library:AddToRegistry(PopUpInner, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
+        Library:AddToRegistry(Highlight, { BackgroundColor3 = "AccentColor" })
+
+        function ConfigGroup:Show()
+            for Frame in next, Library.OpenedFrames do
+                if Frame.Name == "ConfigPopUp" then
+                    Frame.Visible = false
+                    Library.OpenedFrames[Frame] = nil
+                end
+            end
+
+            PopUpOuter.Visible = true
+            Library.OpenedFrames[PopUpOuter] = true
+        end
+
+        function ConfigGroup:Hide()
+            PopUpOuter.Visible = false
+            Library.OpenedFrames[PopUpOuter] = nil
+        end
+
+        IconBtn.MouseButton1Click:Connect(function()
+            if PopUpOuter.Visible then
+                ConfigGroup:Hide()
+            else
+                ConfigGroup:Show()
+            end
+        end)
+
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and PopUpOuter.Visible then
+                local AbsPos, AbsSize = PopUpOuter.AbsolutePosition, PopUpOuter.AbsoluteSize
+                if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X or Mouse.Y < AbsPos.Y or Mouse.Y > AbsPos.Y + AbsSize.Y then
+                    if not Library:IsMouseOverFrame(IconBtn) then
+                        ConfigGroup:Hide()
+                    end
+                end
+            end
+        end))
+
+        function ConfigGroup:AddToggle(SubIdx, SubInfo)
+            SubInfo.Parent = Container
+            return Funcs:AddToggle(SubIdx, SubInfo)
+        end
+
+        function ConfigGroup:AddSlider(SubIdx, SubInfo)
+            SubInfo.Parent = Container
+            return Funcs:AddSlider(SubIdx, SubInfo)
+        end
+    
+        Options[Idx] = ConfigGroup
+        return ConfigGroup
+    end
+
 	function Funcs:AddKeyPicker(Idx, Info)
 		local ParentObj = self
 		local ToggleLabel = self.TextLabel
