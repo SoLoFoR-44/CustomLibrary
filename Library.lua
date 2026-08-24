@@ -1010,8 +1010,8 @@ do
 
         local ConfigGroup = {
             Type = "ConfigGroup",
-            Title = Info.Title
-            Icon = Info.Icon
+            Title = Info.Title,
+            Icon = Info.Icon,
         }
     
         -- 1. Увеличенная кнопка-шестеренка (24x24)
