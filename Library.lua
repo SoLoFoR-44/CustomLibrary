@@ -1003,45 +1003,48 @@ do
 		return self
 	end
 
-	function Funcs:AddConfigGroup(Idx, Info)
-        local ParentLabel = self.TextLabel
+    function Funcs:AddConfigGroup(Idx, Info)
+        local Toggle = self
+        local ParentLabel = Toggle.TextLabel
         Info = Info or {}
 
         local ConfigGroup = {
             Type = "ConfigGroup",
-            Title = Info.Title or "Settings",
+            Title = Info.Title
             Icon = Info.Icon
         }
     
+        -- 1. Увеличенная кнопка-шестеренка (24x24)
         local IconBtn = Library:Create("ImageButton", {
             Name = "ConfigGroupIcon",
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, 14, 0, 14),
+            Size = UDim2.new(0, 24, 0, 24), -- Размер увеличен в ~2 раза
             Image = ConfigGroup.Icon,
             ImageColor3 = Library.FontColor,
-            ZIndex = 6,
+            ZIndex = 8,
             Parent = ParentLabel,
             AnchorPoint = Vector2.new(1, 0.5),
             Position = UDim2.new(1, -2, 0.5, 0),
         })
-
+    
         Library:AddToRegistry(IconBtn, { ImageColor3 = "FontColor" })
-
+    
+        -- 2. Всплывающее окно
         local PopUpOuter = Library:Create("Frame", {
             Name = "ConfigPopUp",
             BackgroundColor3 = Color3.new(0, 0, 0),
             BorderColor3 = Color3.new(0, 0, 0),
-            Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 18),
-            Size = UDim2.fromOffset(200, 0),
+            Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 28),
+            Size = UDim2.fromOffset(210, 0),
             Visible = false,
             ZIndex = 15,
             Parent = ScreenGui,
         })
-
+    
         IconBtn:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-            PopUpOuter.Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 18)
+            PopUpOuter.Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 28)
         end)
-
+    
         local PopUpInner = Library:Create("Frame", {
             BackgroundColor3 = Library.BackgroundColor,
             BorderColor3 = Library.OutlineColor,
@@ -1050,7 +1053,7 @@ do
             ZIndex = 16,
             Parent = PopUpOuter,
         })
-
+    
         local Highlight = Library:Create("Frame", {
             BackgroundColor3 = Library.AccentColor,
             BorderSizePixel = 0,
@@ -1058,23 +1061,25 @@ do
             ZIndex = 17,
             Parent = PopUpInner,
         })
+    
+        -- Контейнер для элементов внутри подменю
+            local Container = Library:Create("Frame", {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(6, 8),
+                Size = UDim2.new(1, -12, 1, -16),
+                ZIndex = 17,
+                Parent = PopUpInner,
+            })
 
-        local Container = Library:Create("Frame", {
-            BackgroundTransparency = 1,
-            Position = UDim2.fromOffset(6, 8),
-            Size = UDim2.new(1, -12, 1, -12),
-            ZIndex = 17,
-            Parent = PopUpInner,
-        })
+            local Layout = Library:Create("UIListLayout", {
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 6),
+                Parent = Container,
+            })
 
-        local Layout = Library:Create("UIListLayout", {
-            SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.new(0, 6),
-            Parent = Container,
-        })
-
+        -- Автоматический перерасчет высоты окна при добавлении элементов
         Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            PopUpOuter.Size = UDim2.fromOffset(200, Layout.AbsoluteContentSize.Y + 16)
+            PopUpOuter.Size = UDim2.fromOffset(210, Layout.AbsoluteContentSize.Y + 18)
         end)
 
         Library:AddToRegistry(PopUpInner, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
@@ -1116,17 +1121,22 @@ do
             end
         end))
 
+        -- Обертка, позволяющая подменять родительский контейнер
+        local SubGroupbox = {
+            Container = Container,
+            AddBlank = function() end,
+            Resize = function() end
+        }
+
         function ConfigGroup:AddToggle(SubIdx, SubInfo)
-            SubInfo.Parent = Container
-            return Funcs:AddToggle(SubIdx, SubInfo)
+            return Funcs.AddToggle(SubGroupbox, SubIdx, SubInfo)
         end
 
         function ConfigGroup:AddSlider(SubIdx, SubInfo)
-            SubInfo.Parent = Container
-            return Funcs:AddSlider(SubIdx, SubInfo)
+            return Funcs.AddSlider(SubGroupbox, SubIdx, SubInfo)
         end
     
-        Options[Idx] = ConfigGroup
+        table.insert(Toggle.Addons, ConfigGroup)
         return ConfigGroup
     end
 
