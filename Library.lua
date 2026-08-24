@@ -1004,21 +1004,22 @@ do
 	end
 
     function Funcs:AddConfigGroup(Idx, Info)
-        local Toggle = self
-        local ParentLabel = Toggle.TextLabel
-        Info = Info or {}
+        local ParentObj = self
+        local ParentLabel = ParentObj.TextLabel or ParentObj.Label or ParentObj
+        
+		ParentObj.Addons = ParentObj.Addons or {}
 
+		Info = Info or {}
         local ConfigGroup = {
             Type = "ConfigGroup",
             Title = Info.Title,
             Icon = Info.Icon,
         }
     
-        -- 1. Увеличенная кнопка-шестеренка (24x24)
         local IconBtn = Library:Create("ImageButton", {
             Name = "ConfigGroupIcon",
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, 24, 0, 24), -- Размер увеличен в ~2 раза
+            Size = UDim2.new(0, 24, 0, 24),
             Image = ConfigGroup.Icon,
             ImageColor3 = Library.FontColor,
             ZIndex = 8,
@@ -1029,7 +1030,6 @@ do
     
         Library:AddToRegistry(IconBtn, { ImageColor3 = "FontColor" })
     
-        -- 2. Всплывающее окно
         local PopUpOuter = Library:Create("Frame", {
             Name = "ConfigPopUp",
             BackgroundColor3 = Color3.new(0, 0, 0),
@@ -1062,7 +1062,6 @@ do
             Parent = PopUpInner,
         })
     
-        -- Контейнер для элементов внутри подменю
             local Container = Library:Create("Frame", {
                 BackgroundTransparency = 1,
                 Position = UDim2.fromOffset(6, 8),
@@ -1077,7 +1076,6 @@ do
                 Parent = Container,
             })
 
-        -- Автоматический перерасчет высоты окна при добавлении элементов
         Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             PopUpOuter.Size = UDim2.fromOffset(210, Layout.AbsoluteContentSize.Y + 18)
         end)
@@ -1121,7 +1119,6 @@ do
             end
         end))
 
-        -- Обертка, позволяющая подменять родительский контейнер
         local SubGroupbox = {
             Container = Container,
             AddBlank = function() end,
@@ -1136,7 +1133,9 @@ do
             return Funcs.AddSlider(SubGroupbox, SubIdx, SubInfo)
         end
     
-        table.insert(Toggle.Addons, ConfigGroup)
+        table.insert(ParentObj.Addons, ConfigGroup)
+    
+        Options[Idx] = ConfigGroup
         return ConfigGroup
     end
 
