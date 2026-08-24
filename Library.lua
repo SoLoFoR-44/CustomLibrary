@@ -1154,57 +1154,52 @@ do
 			ModeButtons[Mode] = ModeButton
 		end
 
-        function KeyPicker:Update()
-            if Info.NoUI then
-                return
-            end
+		function KeyPicker:Update()
+			if Info.NoUI then
+				return
+			end
 
-            local State = KeyPicker:GetState()
+			local State = KeyPicker:GetState()
 
-            -- Если у вас один ContainerLabel, используем его для текста слева (названия)
-            ContainerLabel.Text = Info.Text
-            ContainerLabel.TextXAlignment = Enum.TextXAlignment.Left
-            ContainerLabel.Visible = true
-            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
-            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
+			ContainerLabel.Text = Info.Text
+			ContainerLabel.TextXAlignment = Enum.TextXAlignment.Left
+			ContainerLabel.Visible = true
+			ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+			Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
 
-            -- Ищем или создаем второй Label для правой части (бинд + режим)
-            local RightLabel = ContainerLabel:FindFirstChild("RightText")
-            if not RightLabel then
-                RightLabel = Library:CreateLabel({
-                    Active = false,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Position = UDim2.new(0, 0, 0, 0),
-                    TextXAlignment = Enum.TextXAlignment.Right,
-                    TextSize = ContainerLabel.TextSize,
-                    ZIndex = ContainerLabel.ZIndex,
-                    Parent = ContainerLabel,
-                })
-                RightLabel.Name = "RightText"
-            end
+			local RightLabel = ContainerLabel:FindFirstChild("RightText")
+			if not RightLabel then
+				RightLabel = Library:CreateLabel({
+					Active = false,
+					Size = UDim2.new(1, 0, 1, 0),
+					Position = UDim2.new(0, 0, 0, 0),
+					TextXAlignment = Enum.TextXAlignment.Right,
+					TextSize = ContainerLabel.TextSize,
+					ZIndex = ContainerLabel.ZIndex,
+					Parent = ContainerLabel,
+				})
+				RightLabel.Name = "RightText"
+			end
 
-            -- Форматируем правую часть (клавиша и режим)
-            RightLabel.Text = string.format("[%s] (%s)", KeyPicker.Value, KeyPicker.Mode)
-            RightLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+			RightLabel.Text = string.format("[%s] (%s)", KeyPicker.Value, KeyPicker.Mode)
+			RightLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
 
-            -- Перерасчет размеров окна кейбиндов
-            local YSize = 0
-            local XSize = 0
+			local YSize = 0
+			local XSize = 0
 
-            for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA("TextLabel") and Label.Visible then
-                    YSize = YSize + 18
-                    -- Считаем суммарную ширину обоих текстов с запасом
-                    local TotalWidth = Label.TextBounds.X + (Label:FindFirstChild("RightText") and Label.RightText.TextBounds.X or 0)
-                    if TotalWidth > XSize then
-                        XSize = TotalWidth
-                    end
-                end
-            end
+			for _, Label in next, Library.KeybindContainer:GetChildren() do
+				if Label:IsA("TextLabel") and Label.Visible then
+					YSize = YSize + 18
+					local TotalWidth = Label.TextBounds.X
+						+ (Label:FindFirstChild("RightText") and Label.RightText.TextBounds.X or 0)
+					if TotalWidth > XSize then
+						XSize = TotalWidth
+					end
+				end
+			end
 
-            -- Увеличиваем минимальную ширину (например, до 240 px), чтобы текст по бокам смотрелся красиво
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 30, 240), 0, YSize + 23)
-        end
+			Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 30, 240), 0, YSize + 23)
+		end
 
 		function KeyPicker:GetState()
 			if KeyPicker.Mode == "Always" then
@@ -3789,6 +3784,13 @@ function Library:CreateWindow(...)
 		Fading = true
 		Toggled = not Toggled
 		ModalElement.Modal = Toggled
+
+		if not Toggled then
+            for Frame in next, Library.OpenedFrames do
+                Frame.Visible = false
+            end
+            table.clear(Library.OpenedFrames)
+        end
 
 		if Toggled then
 			Outer.Visible = true
