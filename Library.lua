@@ -1005,21 +1005,27 @@ do
 
     function Funcs:AddConfigGroup(Idx, Info)
         local ParentObj = self
-        local ParentLabel = ParentObj.TextLabel or ParentObj.Label or ParentObj
-        
-		ParentObj.Addons = ParentObj.Addons or {}
-
-		Info = Info or {}
+        -- Находим Label, к которому крепим иконку шестеренки
+        local ParentLabel = ParentObj.TextLabel or ParentObj.Label or (ParentObj.Type == "Label" and ParentObj.TextLabel) or ParentObj
+    
+        -- Инициализируем Addons, если вызываем у Label или элемента без них
+        ParentObj.Addons = ParentObj.Addons or {}
+    
+        -- Находим оригинальный Groupbox (поднимаемся выше, если вызвали у Label/Toggle)
+        local RealGroupbox = ParentObj.Groupbox or (ParentObj.Type == "Groupbox" and ParentObj) or self
+    
+        Info = Info or {}
         local ConfigGroup = {
             Type = "ConfigGroup",
             Title = Info.Title,
             Icon = Info.Icon,
         }
     
+        -- 1. Иконка-шестеренка (увеличенная)
         local IconBtn = Library:Create("ImageButton", {
             Name = "ConfigGroupIcon",
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, 24, 0, 24),
+            Size = UDim2.new(0, 20, 0, 20),
             Image = ConfigGroup.Icon,
             ImageColor3 = Library.FontColor,
             ZIndex = 8,
@@ -1030,11 +1036,12 @@ do
     
         Library:AddToRegistry(IconBtn, { ImageColor3 = "FontColor" })
     
+        -- 2. Всплывающий фрейм PopUp
         local PopUpOuter = Library:Create("Frame", {
             Name = "ConfigPopUp",
             BackgroundColor3 = Color3.new(0, 0, 0),
             BorderColor3 = Color3.new(0, 0, 0),
-            Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 28),
+            Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 24),
             Size = UDim2.fromOffset(210, 0),
             Visible = false,
             ZIndex = 15,
@@ -1042,7 +1049,7 @@ do
         })
     
         IconBtn:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-            PopUpOuter.Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 28)
+            PopUpOuter.Position = UDim2.fromOffset(IconBtn.AbsolutePosition.X, IconBtn.AbsolutePosition.Y + 24)
         end)
     
         local PopUpInner = Library:Create("Frame", {
@@ -1062,27 +1069,30 @@ do
             Parent = PopUpInner,
         })
     
-            local Container = Library:Create("Frame", {
-                BackgroundTransparency = 1,
-                Position = UDim2.fromOffset(6, 8),
-                Size = UDim2.new(1, -12, 1, -16),
-                ZIndex = 17,
-                Parent = PopUpInner,
-            })
-
-            local Layout = Library:Create("UIListLayout", {
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 6),
-                Parent = Container,
-            })
-
+        -- Контейнер элементов
+        local Container = Library:Create("Frame", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(6, 8),
+            Size = UDim2.new(1, -12, 1, -16),
+            ZIndex = 17,
+            Parent = PopUpInner,
+        })
+    
+        local Layout = Library:Create("UIListLayout", {
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 6),
+            Parent = Container,
+        })
+    
+        -- Динамический размер окна по высоте содержимого
         Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             PopUpOuter.Size = UDim2.fromOffset(210, Layout.AbsoluteContentSize.Y + 18)
         end)
-
+    
         Library:AddToRegistry(PopUpInner, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
         Library:AddToRegistry(Highlight, { BackgroundColor3 = "AccentColor" })
-
+    
+        -- Логика скрытия/показа
         function ConfigGroup:Show()
             for Frame in next, Library.OpenedFrames do
                 if Frame.Name == "ConfigPopUp" then
@@ -1090,16 +1100,16 @@ do
                     Library.OpenedFrames[Frame] = nil
                 end
             end
-
+    
             PopUpOuter.Visible = true
             Library.OpenedFrames[PopUpOuter] = true
         end
-
+    
         function ConfigGroup:Hide()
             PopUpOuter.Visible = false
             Library.OpenedFrames[PopUpOuter] = nil
         end
-
+    
         IconBtn.MouseButton1Click:Connect(function()
             if PopUpOuter.Visible then
                 ConfigGroup:Hide()
@@ -1107,7 +1117,7 @@ do
                 ConfigGroup:Show()
             end
         end)
-
+    
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and PopUpOuter.Visible then
                 local AbsPos, AbsSize = PopUpOuter.AbsolutePosition, PopUpOuter.AbsoluteSize
@@ -1119,33 +1129,26 @@ do
             end
         end))
 
-        local SubGroupbox = {
-            Container = Container,
-            AddBlank = function() end,
-            Resize = function() end
-        }
-
-        local RealGroupbox = self.Groupbox or (self.Type == "Groupbox" and self) or self
-    
+        -- 3. Безопасный SubGroupbox с прямой ссылкой на Funcs
         local SubGroupbox = setmetatable({
             Container = Container,
             AddBlank = function() end,
-            Resize = function() end,
+            Resize = function() end
         }, {
-            __index = RealGroupbox 
+            __index = RealGroupbox
         })
 
         function ConfigGroup:AddToggle(SubIdx, SubInfo)
-            return SubGroupbox:AddToggle(SubIdx, SubInfo)
+            return Funcs.AddToggle(SubGroupbox, SubIdx, SubInfo)
         end
 
         function ConfigGroup:AddSlider(SubIdx, SubInfo)
-            return SubGroupbox:AddSlider(SubIdx, SubInfo)
+            return Funcs.AddSlider(SubGroupbox, SubIdx, SubInfo)
         end
     
         table.insert(ParentObj.Addons, ConfigGroup)
-    
         Options[Idx] = ConfigGroup
+    
         return ConfigGroup
     end
 
