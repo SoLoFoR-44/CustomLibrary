@@ -1005,38 +1005,32 @@ do
 
     function Funcs:AddConfigGroup(Idx, Info)
         local ParentObj = self
-        -- Находим Label, к которому крепим иконку шестеренки
         local ParentLabel = ParentObj.TextLabel or ParentObj.Label or (ParentObj.Type == "Label" and ParentObj.TextLabel) or ParentObj
     
-        -- Инициализируем Addons, если вызываем у Label или элемента без них
         ParentObj.Addons = ParentObj.Addons or {}
-    
-        -- Находим оригинальный Groupbox (поднимаемся выше, если вызвали у Label/Toggle)
         local RealGroupbox = ParentObj.Groupbox or (ParentObj.Type == "Groupbox" and ParentObj) or self
     
         Info = Info or {}
         local ConfigGroup = {
             Type = "ConfigGroup",
-            Title = Info.Title,
-            Icon = Info.Icon,
+            Title = Info.Title or "Settings",
+            Icon = Info.Icon or "rbxassetid://15453349637",
         }
     
-        -- 1. Иконка-шестеренка (увеличенная)
         local IconBtn = Library:Create("ImageButton", {
             Name = "ConfigGroupIcon",
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, 20, 0, 20),
+            Size = UDim2.new(0, 24, 0, 24),
             Image = ConfigGroup.Icon,
             ImageColor3 = Library.FontColor,
             ZIndex = 8,
             Parent = ParentLabel,
-            AnchorPoint = Vector2.new(1, 0.5),
+            AnchorPoint = Vector2.new(1, 0.3),
             Position = UDim2.new(1, -2, 0.5, 0),
         })
     
         Library:AddToRegistry(IconBtn, { ImageColor3 = "FontColor" })
     
-        -- 2. Всплывающий фрейм PopUp
         local PopUpOuter = Library:Create("Frame", {
             Name = "ConfigPopUp",
             BackgroundColor3 = Color3.new(0, 0, 0),
@@ -1069,7 +1063,6 @@ do
             Parent = PopUpInner,
         })
     
-        -- Контейнер элементов
         local Container = Library:Create("Frame", {
             BackgroundTransparency = 1,
             Position = UDim2.fromOffset(6, 8),
@@ -1084,7 +1077,6 @@ do
             Parent = Container,
         })
     
-        -- Динамический размер окна по высоте содержимого
         Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             PopUpOuter.Size = UDim2.fromOffset(210, Layout.AbsoluteContentSize.Y + 18)
         end)
@@ -1092,7 +1084,6 @@ do
         Library:AddToRegistry(PopUpInner, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
         Library:AddToRegistry(Highlight, { BackgroundColor3 = "AccentColor" })
     
-        -- Логика скрытия/показа
         function ConfigGroup:Show()
             for Frame in next, Library.OpenedFrames do
                 if Frame.Name == "ConfigPopUp" then
@@ -1128,8 +1119,7 @@ do
                 end
             end
         end))
-
-        -- 3. Безопасный SubGroupbox с прямой ссылкой на Funcs
+    
         local SubGroupbox = setmetatable({
             Container = Container,
             AddBlank = function() end,
@@ -1139,11 +1129,11 @@ do
         })
 
         function ConfigGroup:AddToggle(SubIdx, SubInfo)
-            return Funcs.AddToggle(SubGroupbox, SubIdx, SubInfo)
+            return SubGroupbox:AddToggle(SubIdx, SubInfo)
         end
 
         function ConfigGroup:AddSlider(SubIdx, SubInfo)
-            return Funcs.AddSlider(SubGroupbox, SubIdx, SubInfo)
+            return SubGroupbox:AddSlider(SubIdx, SubInfo)
         end
     
         table.insert(ParentObj.Addons, ConfigGroup)
