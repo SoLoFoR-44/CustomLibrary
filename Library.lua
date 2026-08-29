@@ -2189,7 +2189,6 @@ do
 
 		local ImageUrl = Info.Image or ""
 
-		-- Обработка внешних ссылок (GitHub / Raw URL)
 		if ImageUrl:find("http://") or ImageUrl:find("https://") then
 			if getcustomasset then
 				local fileName = "preview_cache_" .. (Info.Flag or Idx or "temp") .. ".jpg"
@@ -2200,10 +2199,8 @@ do
 			end
 		end
 
-		-- Расчет ZIndex относительно контейнера группы
 		local BaseZIndex = (self.Container and self.Container.ZIndex) or 2
 
-		-- Внешняя рамка (Контейнер)
 		local PreviewFrame = Library:Create("Frame", {
 			BackgroundColor3 = Library.OutlineColor or Color3.fromRGB(50, 50, 50),
 			BorderSizePixel = 0,
@@ -2212,7 +2209,6 @@ do
 			Parent = self.Container,
 		})
 
-		-- Внутренняя подложка
 		local InnerFrame = Library:Create("Frame", {
 			BackgroundColor3 = Library.BackgroundColor or Color3.fromRGB(20, 20, 20),
 			BorderSizePixel = 0,
@@ -2222,7 +2218,6 @@ do
 			Parent = PreviewFrame,
 		})
 
-		-- Градиент для объема
 		Library:Create("UIGradient", {
 			Color = ColorSequence.new({
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
@@ -2232,7 +2227,6 @@ do
 			Parent = InnerFrame,
 		})
 
-		-- Заголовок превью (если передан Text)
 		local YOffset = 4
 		if Info.Text then
 			Library:CreateLabel({
@@ -2248,10 +2242,8 @@ do
 			YOffset = YOffset + 18
 		end
 
-		-- Соотношение сторон картинки (1.6 по умолчанию)
 		local AspectRatio = Info.Ratio or 1.6
 
-		-- Контейнер самого изображения
 		local ImageLabel = Library:Create("ImageLabel", {
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 4, 0, YOffset),
@@ -2262,7 +2254,6 @@ do
 			Parent = InnerFrame,
 		})
 
-		-- Обновление высоты элемента и пересчет размера всей группы
 		local function UpdateSize()
 			local Width = PreviewFrame.AbsoluteSize.X - 10
 			if Width > 0 then
@@ -2281,13 +2272,11 @@ do
 		task.defer(UpdateSize)
 		PreviewFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateSize)
 
-		-- Регистрация цвета в реестре темы (если метод доступен)
 		if Library.AddToRegistry then
 			Library:AddToRegistry(PreviewFrame, { BackgroundColor3 = "OutlineColor" })
 			Library:AddToRegistry(InnerFrame, { BackgroundColor3 = "BackgroundColor" })
 		end
 
-		-- Методы управления превью
 		function PreviewModule:SetImage(NewImage)
 			local FormattedUrl = NewImage
 			if FormattedUrl:find("http://") or FormattedUrl:find("https://") then
@@ -2308,7 +2297,6 @@ do
 			end
 		end
 
-		-- Регистрация Flag в Options / Flags
 		if Info.Flag then
 			if not Library.Options then
 				Library.Options = {}
@@ -2323,12 +2311,297 @@ do
 			end
 		end
 
-		-- Пересчитываем размещение контейнера
 		if self.Resize then
 			self:Resize()
 		end
 
 		return PreviewModule
+	end
+    --
+	function Funcs:AddList(Idx, Info)
+		if Info.SpecialType == "Player" then
+			Info.Values = GetPlayersString()
+			Info.AllowNull = true
+		elseif Info.SpecialType == "Team" then
+			Info.Values = GetTeamsString()
+			Info.AllowNull = true
+		end
+
+		assert(Info.Values, "AddList: Missing value list.")
+		assert(
+			Info.AllowNull or Info.Default,
+			"AddList: Missing default value. Pass `AllowNull` as true if this was intentional."
+		)
+
+		local List = {
+			Values = Info.Values,
+			Value = Info.Multi and {} or nil,
+			Multi = Info.Multi,
+			Type = "List",
+			SpecialType = Info.SpecialType,
+			Callback = Info.Callback or function(Value) end,
+		}
+
+		local Groupbox = self
+		local Container = Groupbox.Container
+
+		if Info.Text then
+			local ListLabel = Library:CreateLabel({
+				Size = UDim2.new(1, 0, 0, 10),
+				TextSize = 14,
+				Text = Info.Text,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextYAlignment = Enum.TextYAlignment.Bottom,
+				ZIndex = 5,
+				Parent = Container,
+			})
+	
+			Groupbox:AddBlank(3)
+		end
+
+		local ITEM_HEIGHT = Info.ItemHeight or 20
+		local MAX_VISIBLE_ROWS = Info.MaxVisibleRows or 5
+
+		local ListOuter = Library:Create("Frame", {
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BorderColor3 = Color3.new(0, 0, 0),
+			Size = UDim2.new(1, -4, 0, (MAX_VISIBLE_ROWS * ITEM_HEIGHT) + 2),
+			ZIndex = 5,
+			Parent = Container,
+		})
+
+		Library:AddToRegistry(ListOuter, {
+			BorderColor3 = "Black",
+		})
+
+		local ListInner = Library:Create("Frame", {
+			BackgroundColor3 = Library.MainColor,
+			BorderColor3 = Library.OutlineColor,
+			BorderMode = Enum.BorderMode.Inset,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 6,
+			Parent = ListOuter,
+		})
+
+		Library:AddToRegistry(ListInner, {
+			BackgroundColor3 = "MainColor",
+			BorderColor3 = "OutlineColor",
+		})
+
+		local Scrolling = Library:Create("ScrollingFrame", {
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			CanvasSize = UDim2.new(0, 0, 0, 0),
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 7,
+			Parent = ListInner,
+
+			TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+			BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+
+			ScrollBarThickness = 3,
+			ScrollBarImageColor3 = Library.AccentColor,
+		})
+
+		Library:AddToRegistry(Scrolling, {
+			ScrollBarImageColor3 = "AccentColor",
+		})
+
+		Library:Create("UIListLayout", {
+			Padding = UDim.new(0, 0),
+			FillDirection = Enum.FillDirection.Vertical,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Parent = Scrolling,
+		})
+
+		if type(Info.Tooltip) == "string" then
+			Library:AddToolTip(Info.Tooltip, ListOuter)
+		end
+
+		function List:GetActiveValues()
+			if Info.Multi then
+				local T = {}
+				for Value, Bool in next, List.Value do
+					table.insert(T, Value)
+				end
+				return #T
+			else
+				return List.Value and 1 or 0
+			end
+		end
+
+		function List:BuildList()
+			local Values = List.Values
+			local Buttons = {}
+
+			for _, Element in next, Scrolling:GetChildren() do
+				if not Element:IsA("UIListLayout") then
+					Element:Destroy()
+				end
+			end
+
+			local Count = 0
+	
+			for Idx, Value in next, Values do
+				Count = Count + 1
+
+				local Button = Library:Create("Frame", {
+					BackgroundColor3 = Library.MainColor,
+					BorderColor3 = Library.OutlineColor,
+					BorderMode = Enum.BorderMode.Middle,
+					Size = UDim2.new(1, -1, 0, ITEM_HEIGHT),
+					ZIndex = 8,
+					Active = true,
+					Parent = Scrolling,
+				})
+
+				Library:AddToRegistry(Button, {
+					BackgroundColor3 = "MainColor",
+					BorderColor3 = "OutlineColor",
+				})
+
+				local ButtonLabel = Library:CreateLabel({
+					Active = false,
+					Size = UDim2.new(1, -6, 1, 0),
+					Position = UDim2.new(0, 6, 0, 0),
+					TextSize = 14,
+					Text = Value,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					ZIndex = 9,
+					Parent = Button,
+				})
+
+				Library:OnHighlight(
+					Button,
+					Button,
+					{ BorderColor3 = "AccentColor", ZIndex = 9 },
+					{ BorderColor3 = "OutlineColor", ZIndex = 8 }
+				)
+
+				local Selected
+
+				if Info.Multi then
+					Selected = List.Value[Value]
+				else
+					Selected = List.Value == Value
+				end
+
+				local Table = {}
+
+				function Table:UpdateButton()
+					if Info.Multi then
+						Selected = List.Value[Value]
+					else
+						Selected = List.Value == Value
+					end
+	
+					ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor
+					Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and "AccentColor" or "FontColor"
+				end
+
+				ButtonLabel.InputBegan:Connect(function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						local Try = not Selected
+
+						if List:GetActiveValues() == 1 and not Try and not Info.AllowNull then
+						else
+							if Info.Multi then
+								Selected = Try
+								List.Value[Value] = Selected and true or nil
+							else
+								Selected = Try
+								List.Value = Selected and Value or nil
+	
+								for _, OtherButton in next, Buttons do
+									OtherButton:UpdateButton()
+								end
+							end
+	
+							Table:UpdateButton()
+	
+							Library:SafeCallback(List.Callback, List.Value)
+							Library:SafeCallback(List.Changed, List.Value)
+							Library:AttemptSave()
+						end
+					end
+				end)
+	
+				Table:UpdateButton()
+				Buttons[Button] = Table
+			end
+	
+			Scrolling.CanvasSize = UDim2.fromOffset(0, Count * ITEM_HEIGHT)
+		end
+	
+		function List:SetValues(NewValues)
+			if NewValues then
+				List.Values = NewValues
+			end
+			List:BuildList()
+		end
+	
+		function List:OnChanged(Func)
+			List.Changed = Func
+			Func(List.Value)
+		end
+	
+		function List:SetValue(Val)
+			if List.Multi then
+				local nTable = {}
+				for Value, Bool in next, Val do
+					if table.find(List.Values, Value) then
+						nTable[Value] = true
+					end
+				end
+				List.Value = nTable
+			else
+				if not Val then
+					List.Value = nil
+				elseif table.find(List.Values, Val) then
+					List.Value = Val
+				end
+			end
+
+			List:BuildList()
+			Library:SafeCallback(List.Callback, List.Value)
+			Library:SafeCallback(List.Changed, List.Value)
+		end
+
+		List:BuildList()
+
+		local Defaults = {}
+		if type(Info.Default) == "string" then
+			local Idx = table.find(List.Values, Info.Default)
+			if Idx then table.insert(Defaults, Idx) end
+		elseif type(Info.Default) == "table" then
+			for _, Value in next, Info.Default do
+				local Idx = table.find(List.Values, Value)
+				if Idx then table.insert(Defaults, Idx) end
+			end
+		elseif type(Info.Default) == "number" and List.Values[Info.Default] ~= nil then
+			table.insert(Defaults, Info.Default)
+		end
+
+		if next(Defaults) then
+			for i = 1, #Defaults do
+				local Index = Defaults[i]
+				if Info.Multi then
+					List.Value[List.Values[Index]] = true
+				else
+					List.Value = List.Values[Index]
+					break
+				end
+			end
+			List:BuildList()
+		end
+
+		Groupbox:AddBlank(Info.BlankSize or 5)
+		Groupbox:Resize()
+	
+		Options[Idx] = List
+	
+		return List
 	end
 	-- ULTRA KRUTOI AI SCRIPT END
 	function Funcs:AddDropdown(Idx, Info)
