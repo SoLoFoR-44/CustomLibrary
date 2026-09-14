@@ -219,8 +219,16 @@ local SaveManager = {} do
 
 		local section = tab:AddRightGroupbox('Configuration')
 
-		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' })
-		section:AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
+		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' }) -- :AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
+		section:AddList("SaveManager_ConfigList", {
+            Text = "Config list",
+            Values = self:RefreshConfigList(),
+            MaxVisibleRows = 7,
+            Clickable = true,
+            Multi = false,
+            Default = "",
+            Callback = function(Value) end
+        })
 
 		section:AddDivider()
 
