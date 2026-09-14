@@ -9,33 +9,44 @@ local SaveManager = {} do
 				return { type = 'Toggle', idx = idx, value = object.Value } 
 			end,
 			Load = function(idx, data)
-				if Toggles[idx] and type(data.value) == "boolean" then 
+				if Toggles[idx] then 
 					Toggles[idx]:SetValue(data.value)
 				end
 			end,
 		},
+
+        List = {
+            Save = function(idx, object) 
+                return { 
+                    type = 'List', 
+                    idx = idx, 
+                    value = object.Value 
+                } 
+            end,
+            Load = function(idx, data)
+                if Options[idx] then 
+                    Options[idx]:SetValue(data.value)
+                end
+            end,
+        },
+		
 		Slider = {
 			Save = function(idx, object)
 				return { type = 'Slider', idx = idx, value = tostring(object.Value) }
 			end,
 			Load = function(idx, data)
 				if Options[idx] then 
-					local num = tonumber(data.value)
-					if num then
-						Options[idx]:SetValue(num)
-					end
+					Options[idx]:SetValue(data.value)
 				end
 			end,
 		},
 		Dropdown = {
 			Save = function(idx, object)
-				return { type = 'Dropdown', idx = idx, value = object.Value, multi = object.Multi }
+				return { type = 'Dropdown', idx = idx, value = object.Value, mutli = object.Multi }
 			end,
 			Load = function(idx, data)
-				if Options[idx] and data.value ~= nil then 
-					pcall(function()
-						Options[idx]:SetValue(data.value)
-					end)
+				if Options[idx] then 
+					Options[idx]:SetValue(data.value)
 				end
 			end,
 		},
@@ -44,11 +55,8 @@ local SaveManager = {} do
 				return { type = 'ColorPicker', idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
 			end,
 			Load = function(idx, data)
-				if Options[idx] and data.value then 
-					local success, color = pcall(Color3.fromHex, data.value)
-					if success then
-						Options[idx]:SetValueRGB(color, data.transparency or 0)
-					end
+				if Options[idx] then 
+					Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
 				end
 			end,
 		},
@@ -57,21 +65,19 @@ local SaveManager = {} do
 				return { type = 'KeyPicker', idx = idx, mode = object.Mode, key = object.Value }
 			end,
 			Load = function(idx, data)
-				if Options[idx] and data.key ~= nil and data.mode ~= nil then 
-					Options[idx]:SetValue({
-						Value = data.key,
-						Mode = data.mode
-					})
+				if Options[idx] then 
+					Options[idx]:SetValue({ data.key, data.mode })
 				end
 			end,
 		},
+
 		Input = {
 			Save = function(idx, object)
-				return { type = 'Input', idx = idx, text = object.Value or "" }
+				return { type = 'Input', idx = idx, text = object.Value }
 			end,
 			Load = function(idx, data)
-				if Options[idx] then
-					Options[idx]:SetValue(type(data.text) == "string" and data.text or "")
+				if Options[idx] and type(data.text) == 'string' then
+					Options[idx]:SetValue(data.text)
 				end
 			end,
 		},
@@ -101,12 +107,14 @@ local SaveManager = {} do
 
 		for idx, toggle in next, Toggles do
 			if self.Ignore[idx] then continue end
+
 			table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
 		end
 
 		for idx, option in next, Options do
 			if not self.Parser[option.Type] then continue end
 			if self.Ignore[idx] then continue end
+
 			table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
 		end	
 
@@ -129,13 +137,10 @@ local SaveManager = {} do
 
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
 		if not success then return false, 'decode error' end
-		if not decoded.objects then return false, 'invalid config structure' end
 
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				pcall(function()
-					self.Parser[option.type].Load(option.idx, option)
-				end)
+				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end) -- task.spawn() so the config loading wont get stuck.
 			end
 		end
 
@@ -144,8 +149,8 @@ local SaveManager = {} do
 
 	function SaveManager:IgnoreThemeSettings()
 		self:SetIgnoreIndexes({ 
-			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor",
-			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName',
+			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", -- themes
+			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName', -- themes
 		})
 	end
 
@@ -171,10 +176,12 @@ local SaveManager = {} do
 		for i = 1, #list do
 			local file = list[i]
 			if file:sub(-5) == '.json' then
+				-- i hate this but it has to be done ...
+
 				local pos = file:find('.json', 1, true)
 				local start = pos
-				local char = file:sub(pos, pos)
 
+				local char = file:sub(pos, pos)
 				while char ~= '/' and char ~= '\\' and char ~= '' do
 					pos = pos - 1
 					char = file:sub(pos, pos)
@@ -206,12 +213,13 @@ local SaveManager = {} do
 		end
 	end
 
+
 	function SaveManager:BuildConfigSection(tab)
 		assert(self.Library, 'Must set SaveManager.Library')
 
 		local section = tab:AddRightGroupbox('Configuration')
 
-		section:AddInput('SaveManager_ConfigName', { Text = 'Config name' })
+		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' })
 		section:AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
 
 		section:AddDivider()
@@ -219,7 +227,7 @@ local SaveManager = {} do
 		section:AddButton('Create config', function()
 			local name = Options.SaveManager_ConfigName.Value
 
-			if not name or name:gsub(' ', '') == '' then 
+			if name:gsub(' ', '') == '' then 
 				return self.Library:Notify('Invalid config name (empty)', 2)
 			end
 
@@ -261,11 +269,9 @@ local SaveManager = {} do
 
 		section:AddButton('Set as autoload', function()
 			local name = Options.SaveManager_ConfigList.Value
-			if name then
-				writefile(self.Folder .. '/settings/autoload.txt', name)
-				SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
-				self.Library:Notify(string.format('Set %q to auto load', name))
-			end
+			writefile(self.Folder .. '/settings/autoload.txt', name)
+			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
+			self.Library:Notify(string.format('Set %q to auto load', name))
 		end)
 
 		SaveManager.AutoloadLabel = section:AddLabel('Current autoload config: none', true)
