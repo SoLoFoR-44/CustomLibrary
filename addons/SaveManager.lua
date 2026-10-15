@@ -70,7 +70,6 @@ local SaveManager = {} do
 				end
 			end,
 		},
-
 		Input = {
 			Save = function(idx, object)
 				return { type = 'Input', idx = idx, text = object.Value }
@@ -78,6 +77,26 @@ local SaveManager = {} do
 			Load = function(idx, data)
 				if Options[idx] and type(data.text) == 'string' then
 					Options[idx]:SetValue(data.text)
+				end
+			end,
+		},
+		-- Кастомный парсер для сохранения скинов
+		Skins = {
+			Save = function()
+				return { type = 'Skins', value = Sections.Skins.Applied }
+			end,
+			Load = function(idx, data)
+				if type(data.value) == 'table' then
+					table.clear(Sections.Skins.Applied)
+					for gun, skin in pairs(data.value) do
+						Sections.Skins.Applied[gun] = skin
+					end
+					if UpdateInventoryUI then
+						UpdateInventoryUI()
+					end
+					if ApplySkinToCurrentHandModel then
+						ApplySkinToCurrentHandModel()
+					end
 				end
 			end,
 		},
@@ -90,7 +109,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:SetFolder(folder)
-		self.Folder = folder;
+		self.Folder = folder
 		self:BuildFolderTree()
 	end
 
@@ -118,6 +137,11 @@ local SaveManager = {} do
 			table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
 		end	
 
+		-- Сохраняем кастомные скины
+		if Sections and Sections.Skins and Sections.Skins.Applied then
+			table.insert(data.objects, self.Parser.Skins.Save())
+		end
+
 		local success, encoded = pcall(httpService.JSONEncode, httpService, data)
 		if not success then
 			return false, 'failed to encode data'
@@ -140,7 +164,7 @@ local SaveManager = {} do
 
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end) -- task.spawn() so the config loading wont get stuck.
+				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end)
 			end
 		end
 
@@ -149,8 +173,8 @@ local SaveManager = {} do
 
 	function SaveManager:IgnoreThemeSettings()
 		self:SetIgnoreIndexes({ 
-			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", -- themes
-			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName', -- themes
+			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor",
+			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName',
 		})
 	end
 
@@ -176,8 +200,6 @@ local SaveManager = {} do
 		for i = 1, #list do
 			local file = list[i]
 			if file:sub(-5) == '.json' then
-				-- i hate this but it has to be done ...
-
 				local pos = file:find('.json', 1, true)
 				local start = pos
 
@@ -213,13 +235,12 @@ local SaveManager = {} do
 		end
 	end
 
-
 	function SaveManager:BuildConfigSection(tab)
 		assert(self.Library, 'Must set SaveManager.Library')
 
 		local section = tab:AddRightGroupbox('Configuration')
 
-		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' }) -- :AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
+		section:AddInput('SaveManager_ConfigName', { Text = 'Config name' })
 		section:AddList("SaveManager_ConfigList", {
             Text = "Config list",
             Values = self:RefreshConfigList(),
