@@ -2178,7 +2178,6 @@ do
 		return Slider
 	end
 
-	-- ULTRA KRUTOI AI SCRIPT START
 	function Funcs:AddPreview(Idx, Info)
 		-- Info = { Text = "Preview", Image = "rbxassetid://...", Ratio = 1.6, Flag = "..." }
 		local PreviewModule = {
@@ -2317,246 +2316,251 @@ do
 
 		return PreviewModule
 	end
-    --
-function Funcs:AddList(Idx, Info)
-        if Info.SpecialType == "Player" then
-            Info.Values = GetPlayersString()
-            Info.AllowNull = true
-        elseif Info.SpecialType == "Team" then
-            Info.Values = GetTeamsString()
-            Info.AllowNull = true
-        end
 
-        assert(Info.Values, "AddList: Missing value list.")
-        assert(
-            Info.AllowNull or Info.Default,
-            "AddList: Missing default value. Pass `AllowNull` as true if this was intentional."
-        )
+	function Funcs:AddList(Idx, Info)
+		if Info.SpecialType == "Player" then
+			Info.Values = GetPlayersString()
+			Info.AllowNull = true
+		elseif Info.SpecialType == "Team" then
+			Info.Values = GetTeamsString()
+			Info.AllowNull = true
+		end
 
-        local List = {
-            Values = Info.Values,
-            Value = Info.Multi and {} or nil,
-            Multi = Info.Multi,
-            Clickable = Info.Clickable ~= false,
-            Type = "List",
-            SpecialType = Info.SpecialType,
-            Callback = Info.Callback or function(Value) end,
-        }
+		assert(Info.Values, "AddList: Missing value list.")
+		assert(
+			Info.AllowNull or Info.Default,
+			"AddList: Missing default value. Pass `AllowNull` as true if this was intentional."
+		)
 
-        local Groupbox = self
-        local Container = Groupbox.Container
+		local List = {
+			Values = Info.Values,
+			Value = Info.Multi and {} or nil,
+			Multi = Info.Multi,
+			Clickable = Info.Clickable ~= false,
+			Type = "List",
+			SpecialType = Info.SpecialType,
+			Callback = Info.Callback or function(Value) end,
+		}
 
-        if type(Info.Text) == "string" and Info.Text ~= "" then
-            local ListLabel = Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 10),
-                TextSize = 14,
-                Text = Info.Text,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                TextYAlignment = Enum.TextYAlignment.Bottom,
-                ZIndex = 5,
-                Parent = Container,
-            })
+		local Groupbox = self
+		local Container = Groupbox.Container
 
-            Groupbox:AddBlank(3)
-        end
+		if type(Info.Text) == "string" and Info.Text ~= "" then
+			local ListLabel = Library:CreateLabel({
+				Size = UDim2.new(1, 0, 0, 10),
+				TextSize = 14,
+				Text = Info.Text,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextYAlignment = Enum.TextYAlignment.Bottom,
+				ZIndex = 5,
+				Parent = Container,
+			})
 
-        local ITEM_HEIGHT = Info.ItemHeight or 20
-        local MAX_VISIBLE_ROWS = Info.MaxVisibleRows or 5
+			Groupbox:AddBlank(3)
+		end
 
-        local ListOuter = Library:Create("Frame", {
-            BackgroundColor3 = Color3.new(0, 0, 0),
-            BorderColor3 = Color3.new(0, 0, 0),
-            Size = UDim2.new(1, -4, 0, (MAX_VISIBLE_ROWS * ITEM_HEIGHT) + 2),
-            ZIndex = 5,
-            Parent = Container,
-        })
+		local ITEM_HEIGHT = Info.ItemHeight or 20
+		local MAX_VISIBLE_ROWS = Info.MaxVisibleRows or 5
 
-        Library:AddToRegistry(ListOuter, {
-            BorderColor3 = "Black",
-        })
+		local ListOuter = Library:Create("Frame", {
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BorderColor3 = Color3.new(0, 0, 0),
+			Size = UDim2.new(1, -4, 0, (MAX_VISIBLE_ROWS * ITEM_HEIGHT) + 2),
+			ZIndex = 5,
+			Parent = Container,
+		})
 
-        local ListInner = Library:Create("Frame", {
-            BackgroundColor3 = Library.MainColor,
-            BorderColor3 = Library.OutlineColor,
-            BorderMode = Enum.BorderMode.Inset,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 1, 0),
-            ZIndex = 6,
-            Parent = ListOuter,
-        })
+		Library:AddToRegistry(ListOuter, {
+			BorderColor3 = "Black",
+		})
 
-        Library:AddToRegistry(ListInner, {
-            BackgroundColor3 = "MainColor",
-            BorderColor3 = "OutlineColor",
-        })
+		local ListInner = Library:Create("Frame", {
+			BackgroundColor3 = Library.MainColor,
+			BorderColor3 = Library.OutlineColor,
+			BorderMode = Enum.BorderMode.Inset,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 6,
+			Parent = ListOuter,
+		})
 
-        local Scrolling = Library:Create("ScrollingFrame", {
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            CanvasSize = UDim2.new(0, 0, 0, 0),
-            Size = UDim2.new(1, 0, 1, 0),
-            ZIndex = 7,
-            Parent = ListInner,
+		Library:AddToRegistry(ListInner, {
+			BackgroundColor3 = "MainColor",
+			BorderColor3 = "OutlineColor",
+		})
 
-            TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
-            BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+		local Scrolling = Library:Create("ScrollingFrame", {
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			CanvasSize = UDim2.new(0, 0, 0, 0),
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 7,
+			Parent = ListInner,
 
-            ScrollBarThickness = 3,
-            ScrollBarImageColor3 = Library.AccentColor,
-        })
+			TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+			BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
 
-        Library:AddToRegistry(Scrolling, {
-            ScrollBarImageColor3 = "AccentColor",
-        })
+			ScrollBarThickness = 3,
+			ScrollBarImageColor3 = Library.AccentColor,
+		})
 
-        Library:Create("UIListLayout", {
-            Padding = UDim.new(0, 0),
-            FillDirection = Enum.FillDirection.Vertical,
-            SortOrder = Enum.SortOrder.LayoutOrder,
-            Parent = Scrolling,
-        })
+		Library:AddToRegistry(Scrolling, {
+			ScrollBarImageColor3 = "AccentColor",
+		})
 
-        if type(Info.Tooltip) == "string" then
-            Library:AddToolTip(Info.Tooltip, ListOuter)
-        end
+		Library:Create("UIListLayout", {
+			Padding = UDim.new(0, 0),
+			FillDirection = Enum.FillDirection.Vertical,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Parent = Scrolling,
+		})
 
-        function List:GetActiveValues()
-            if Info.Multi then
-                local T = {}
-                for Value, Bool in next, List.Value do
-                    table.insert(T, Value)
-                end
-                return #T
-            else
-                return List.Value and 1 or 0
-            end
-        end
+		if type(Info.Tooltip) == "string" then
+			Library:AddToolTip(Info.Tooltip, ListOuter)
+		end
 
-        function List:BuildList()
-            local Values = List.Values
-            local Buttons = {}
+		function List:GetActiveValues()
+			if Info.Multi then
+				local T = {}
+				for Value, Bool in next, List.Value do
+					table.insert(T, Value)
+				end
+				return #T
+			else
+				return List.Value and 1 or 0
+			end
+		end
 
-            for _, Element in next, Scrolling:GetChildren() do
-                if not Element:IsA("UIListLayout") then
-                    Element:Destroy()
-                end
-            end
+		function List:BuildList()
+			local Values = List.Values
+			local Buttons = {}
 
-            local Count = 0
+			for _, Element in next, Scrolling:GetChildren() do
+				if not Element:IsA("UIListLayout") then
+					Element:Destroy()
+				end
+			end
 
-            for Idx, Value in next, Values do
-                Count = Count + 1
+			local Count = 0
 
-                local Button = Library:Create("Frame", {
-                    BackgroundColor3 = Library.MainColor,
-                    BorderColor3 = Library.OutlineColor,
-                    BorderMode = Enum.BorderMode.Middle,
-                    Size = UDim2.new(1, -1, 0, ITEM_HEIGHT),
-                    ZIndex = 8,
-                    Active = List.Clickable,
-                    Parent = Scrolling,
-                })
+			for Idx, Value in next, Values do
+				Count = Count + 1
 
-                Library:AddToRegistry(Button, {
-                    BackgroundColor3 = "MainColor",
-                    BorderColor3 = "OutlineColor",
-                })
+				local Button = Library:Create("Frame", {
+					BackgroundColor3 = Library.MainColor,
+					BorderColor3 = Library.OutlineColor,
+					BorderMode = Enum.BorderMode.Middle,
+					Size = UDim2.new(1, -1, 0, ITEM_HEIGHT),
+					ZIndex = 8,
+					Active = List.Clickable,
+					Parent = Scrolling,
+				})
 
-                local ButtonLabel = Library:CreateLabel({
-                    Active = false,
-                    Size = UDim2.new(1, -6, 1, 0),
-                    Position = UDim2.new(0, 6, 0, 0),
-                    TextSize = 14,
-                    Text = Value,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    ZIndex = 9,
-                    Parent = Button,
-                })
+				Library:AddToRegistry(Button, {
+					BackgroundColor3 = "MainColor",
+					BorderColor3 = "OutlineColor",
+				})
 
-                if List.Clickable then
-                    Library:OnHighlight(
-                        Button,
-                        Button,
-                        { BorderColor3 = "AccentColor", ZIndex = 9 },
-                        { BorderColor3 = "OutlineColor", ZIndex = 8 }
-                    )
-                end
+				local ButtonLabel = Library:CreateLabel({
+					Active = false,
+					Size = UDim2.new(1, -6, 1, 0),
+					Position = UDim2.new(0, 6, 0, 0),
+					TextSize = 14,
+					Text = Value,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					ZIndex = 9,
+					Parent = Button,
+				})
 
-                local Selected
+				if List.Clickable then
+					Library:OnHighlight(
+						Button,
+						Button,
+						{ BorderColor3 = "AccentColor", ZIndex = 9 },
+						{ BorderColor3 = "OutlineColor", ZIndex = 8 }
+					)
+				end
 
-                if Info.Multi then
-                    Selected = List.Value and List.Value[Value]
-                else
-                    Selected = List.Value == Value
-                end
+				local Selected
 
-                local Table = {}
+				if Info.Multi then
+					Selected = List.Value and List.Value[Value]
+				else
+					Selected = List.Value == Value
+				end
 
-                function Table:UpdateButton()
-                    if Info.Multi then
-                        Selected = List.Value and List.Value[Value]
-                    else
-                        Selected = List.Value == Value
-                    end
+				local Table = {}
 
-                    ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor
-                    Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and "AccentColor" or "FontColor"
-                end
+				function Table:UpdateButton()
+					if Info.Multi then
+						Selected = List.Value and List.Value[Value]
+					else
+						Selected = List.Value == Value
+					end
 
-                ButtonLabel.InputBegan:Connect(function(Input)
-                    if not List.Clickable then return end
+					ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor
+					Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and "AccentColor" or "FontColor"
+				end
 
-                    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        local Try = not Selected
+				ButtonLabel.InputBegan:Connect(function(Input)
+					if not List.Clickable then
+						return
+					end
 
-                        if List:GetActiveValues() == 1 and not Try and not Info.AllowNull then
-                        else
-                            if Info.Multi then
-                                Selected = Try
-                                List.Value[Value] = Selected and true or nil
-                            else
-                                Selected = Try
-                                List.Value = Selected and Value or nil
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						local Try = not Selected
 
-                                for _, OtherButton in next, Buttons do
-                                    OtherButton:UpdateButton()
-                                end
-                            end
+						if List:GetActiveValues() == 1 and not Try and not Info.AllowNull then
+						else
+							if Info.Multi then
+								Selected = Try
+								List.Value[Value] = Selected and true or nil
+							else
+								Selected = Try
+								List.Value = Selected and Value or nil
 
-                            Table:UpdateButton()
+								for _, OtherButton in next, Buttons do
+									OtherButton:UpdateButton()
+								end
+							end
 
-                            Library:SafeCallback(List.Callback, List.Value)
-                            Library:SafeCallback(List.Changed, List.Value)
-                            Library:AttemptSave()
-                        end
-                    end
-                end)
+							Table:UpdateButton()
 
-                Table:UpdateButton()
-                Buttons[Button] = Table
-            end
+							Library:SafeCallback(List.Callback, List.Value)
+							Library:SafeCallback(List.Changed, List.Value)
+							Library:AttemptSave()
+						end
+					end
+				end)
 
-            Scrolling.CanvasSize = UDim2.fromOffset(0, Count * ITEM_HEIGHT)
-        end
+				Table:UpdateButton()
+				Buttons[Button] = Table
+			end
 
-        function List:SetValues(NewValues)
-            if NewValues then
-                List.Values = NewValues
-            end
-            List:BuildList()
-        end
+			Scrolling.CanvasSize = UDim2.fromOffset(0, Count * ITEM_HEIGHT)
+		end
 
-        function List:SetClickable(Bool)
-            List.Clickable = Bool
-            List:BuildList()
-        end
+		function List:SetValues(NewValues)
+			if NewValues then
+				List.Values = NewValues
+			end
+			List:BuildList()
+		end
 
-        function List:OnChanged(Func)
-            List.Changed = Func
-            Func(List.Value)
-        end
+		function List:SetClickable(Bool)
+			List.Clickable = Bool
+			List:BuildList()
+		end
+
+		function List:OnChanged(Func)
+			List.Changed = Func
+			Func(List.Value)
+		end
 
         function List:SetValue(Val)
+
+            if List.Value == Val then return end
+
             if List.Multi then
                 local nTable = {}
                 for Value, Bool in next, Val do
@@ -2566,10 +2570,12 @@ function Funcs:AddList(Idx, Info)
                 end
                 List.Value = nTable
             else
-                if not Val then
+                if not Val or Val == "" then
                     List.Value = nil
                 elseif table.find(List.Values, Val) then
                     List.Value = Val
+                else
+                    List.Value = nil
                 end
             end
 
@@ -2578,42 +2584,46 @@ function Funcs:AddList(Idx, Info)
             Library:SafeCallback(List.Changed, List.Value)
         end
 
-        List:BuildList()
+		List:BuildList()
 
-        local Defaults = {}
-        if type(Info.Default) == "string" then
-            local Idx = table.find(List.Values, Info.Default)
-            if Idx then table.insert(Defaults, Idx) end
-        elseif type(Info.Default) == "table" then
-            for _, Value in next, Info.Default do
-                local Idx = table.find(List.Values, Value)
-                if Idx then table.insert(Defaults, Idx) end
-            end
-        elseif type(Info.Default) == "number" and List.Values[Info.Default] ~= nil then
-            table.insert(Defaults, Info.Default)
-        end
+		local Defaults = {}
+		if type(Info.Default) == "string" then
+			local Idx = table.find(List.Values, Info.Default)
+			if Idx then
+				table.insert(Defaults, Idx)
+			end
+		elseif type(Info.Default) == "table" then
+			for _, Value in next, Info.Default do
+				local Idx = table.find(List.Values, Value)
+				if Idx then
+					table.insert(Defaults, Idx)
+				end
+			end
+		elseif type(Info.Default) == "number" and List.Values[Info.Default] ~= nil then
+			table.insert(Defaults, Info.Default)
+		end
 
-        if next(Defaults) then
-            for i = 1, #Defaults do
-                local Index = Defaults[i]
-                if Info.Multi then
-                    List.Value[List.Values[Index]] = true
-                else
-                    List.Value = List.Values[Index]
-                    break
-                end
-            end
-            List:BuildList()
-        end
+		if next(Defaults) then
+			for i = 1, #Defaults do
+				local Index = Defaults[i]
+				if Info.Multi then
+					List.Value[List.Values[Index]] = true
+				else
+					List.Value = List.Values[Index]
+					break
+				end
+			end
+			List:BuildList()
+		end
 
-        Groupbox:AddBlank(Info.BlankSize or 5)
-        Groupbox:Resize()
+		Groupbox:AddBlank(Info.BlankSize or 5)
+		Groupbox:Resize()
 
-        Options[Idx] = List
+		Options[Idx] = List
 
-        return List
-    end
-	-- ULTRA KRUTOI AI SCRIPT END
+		return List
+	end
+
 	function Funcs:AddDropdown(Idx, Info)
 		if Info.SpecialType == "Player" then
 			Info.Values = GetPlayersString()
@@ -4070,11 +4080,11 @@ function Library:CreateWindow(...)
 		ModalElement.Modal = Toggled
 
 		if not Toggled then
-            for Frame in next, Library.OpenedFrames do
-                Frame.Visible = false
-            end
-            table.clear(Library.OpenedFrames)
-        end
+			for Frame in next, Library.OpenedFrames do
+				Frame.Visible = false
+			end
+			table.clear(Library.OpenedFrames)
+		end
 
 		if Toggled then
 			Outer.Visible = true
