@@ -2580,8 +2580,12 @@ do
             end
 
             List:BuildList()
-            Library:SafeCallback(List.Callback, List.Value)
-            Library:SafeCallback(List.Changed, List.Value)
+            if List.Callback then
+                Library:SafeCallback(List.Callback, List.Value)
+            end
+            if List.Changed then
+                Library:SafeCallback(List.Changed, List.Value)
+            end
         end
 
 		List:BuildList()
