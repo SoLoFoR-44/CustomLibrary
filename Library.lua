@@ -3563,7 +3563,7 @@ function Library:CreateWindow(...)
 	end
 
 	function Window:AddTab(Name)
-		local Tab = {Groupboxes = {},Tabboxes = {},},
+		local Tab = {Groupboxes = {},Tabboxes = {},}
 		Tab.SubTabs = {}
 
 		local TabButton = Library:Create("Frame", {
