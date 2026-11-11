@@ -442,25 +442,6 @@ do
 			Position = UDim2.new(1, -2, 0.5, 0),
 		})
 
-		if self.Container then
-			local function UpdatePickerPos()
-				local containerRightEdge = self.Container.AbsolutePosition.X + self.Container.AbsoluteSize.X
-				local labelX = ToggleLabel.AbsolutePosition.X
-				
-				local targetOffset = containerRightEdge - labelX - 4
-				
-				DisplayFrame.Position = UDim2.new(0, targetOffset, 0.5, 0)
-			end
-
-			self.Container:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdatePickerPos)
-			ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdatePickerPos)
-			
-			task.spawn(function()
-				task.wait()
-				UpdatePickerPos()
-			end)
-		end
-
 		local CheckerFrame = Library:Create("ImageLabel", {
 			BorderSizePixel = 0,
 			Size = UDim2.new(0, 27, 0, 13),
@@ -1876,12 +1857,19 @@ do
 		local Groupbox = self
 		local Container = Groupbox.Container
 
+		local ToggleWrapper = Library:Create("Frame", {
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1, -4, 0, 13),
+			ZIndex = 5,
+			Parent = Container,
+		})
+
 		local ToggleOuter = Library:Create("Frame", {
 			BackgroundColor3 = Color3.new(0, 0, 0),
 			BorderColor3 = Color3.new(0, 0, 0),
 			Size = UDim2.new(0, 13, 0, 13),
 			ZIndex = 5,
-			Parent = Container,
+			Parent = ToggleWrapper, 
 		})
 
 		Library:AddToRegistry(ToggleOuter, {
@@ -1903,14 +1891,14 @@ do
 		})
 
 		local ToggleLabel = Library:CreateLabel({
-			Size = UDim2.new(0, 216, 1, 0),
-			Position = UDim2.new(1, 6, 0, 0),
+			Size = UDim2.new(1, -19, 1, 0), 
+			Position = UDim2.new(0, 19, 0, 0), 
 			TextSize = 14,
 			Text = Info.Text,
 			TextColor3 = Info.Risky and Library.RiskColor or Library.FontColor,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = 6,
-			Parent = ToggleInner,
+			Parent = ToggleWrapper, 
 		})
 
 		Library:AddToRegistry(ToggleLabel, {
@@ -1927,9 +1915,9 @@ do
 
 		local ToggleRegion = Library:Create("Frame", {
 			BackgroundTransparency = 1,
-			Size = UDim2.new(0, 170, 1, 0),
+			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 8,
-			Parent = ToggleOuter,
+			Parent = ToggleWrapper,
 		})
 
 		Library:OnHighlight(ToggleRegion, ToggleOuter, { BorderColor3 = "AccentColor" }, { BorderColor3 = "Black" })
