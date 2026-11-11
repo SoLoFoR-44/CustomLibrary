@@ -430,7 +430,7 @@ do
 
 		ColorPicker:SetHSVFromRGB(ColorPicker.Value)
 
-		local DisplayFrame = Library:Create("Frame", {
+        local DisplayFrame = Library:Create("Frame", {
 			BackgroundColor3 = ColorPicker.Value,
 			BorderColor3 = Library:GetDarkerColor(ColorPicker.Value),
 			BorderMode = Enum.BorderMode.Inset,
@@ -441,6 +441,25 @@ do
 			AnchorPoint = Vector2.new(1, 0.5),
 			Position = UDim2.new(1, -2, 0.5, 0),
 		})
+
+		if self.Container then
+			local function UpdatePickerPos()
+				local containerRightEdge = self.Container.AbsolutePosition.X + self.Container.AbsoluteSize.X
+				local labelX = ToggleLabel.AbsolutePosition.X
+				
+				local targetOffset = containerRightEdge - labelX - 4
+				
+				DisplayFrame.Position = UDim2.new(0, targetOffset, 0.5, 0)
+			end
+
+			self.Container:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdatePickerPos)
+			ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdatePickerPos)
+			
+			task.spawn(function()
+				task.wait()
+				UpdatePickerPos()
+			end)
+		end
 
 		local CheckerFrame = Library:Create("ImageLabel", {
 			BorderSizePixel = 0,
@@ -4085,11 +4104,11 @@ function Library:CreateWindow(...)
                 ZIndex = 4,
                 Parent = Tab.SubTabSelectorOuter,
             })
-
+ 
             local ActiveLine = Library:Create("Frame", {
                 BackgroundColor3 = Library.AccentColor,
                 BorderSizePixel = 0,
-                Position = UDim2.new(1, -2, 0, 2),
+                Position = UDim2.new(0, 0, 0, 2),
                 Size = UDim2.new(0, 2, 1, -4),
                 Visible = false,
                 ZIndex = 5,
@@ -4098,11 +4117,11 @@ function Library:CreateWindow(...)
             Library:AddToRegistry(ActiveLine, { BackgroundColor3 = "AccentColor" })
 
             local SubTabLabel = Library:CreateLabel({
-                Position = UDim2.new(0, 0, 0, 0),
+                Position = UDim2.new(0, 8, 0, 0),
                 Size = UDim2.new(1, -8, 1, 0),
                 TextSize = 14,
                 Text = Name,
-                TextXAlignment = Enum.TextXAlignment.Right,
+                TextXAlignment = Enum.TextXAlignment.Left,
                 ZIndex = 5,
                 Parent = SubTabButton,
             })
@@ -4167,9 +4186,9 @@ function Library:CreateWindow(...)
                 for _, other in next, Tab.SubTabs do
                     other:Hide()
                 end
-
                 SubTabLabel.TextColor3 = Library.AccentColor
                 Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "AccentColor"
+                SubTabLabel.TextSize = 15 -- Делаем шрифт больше у активного
                 ActiveLine.Visible = true 
                 SubTabFrame.Visible = true
             end
@@ -4177,6 +4196,7 @@ function Library:CreateWindow(...)
             function SubTab:Hide()
                 SubTabLabel.TextColor3 = Library.FontColorDark
                 Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "FontColorDark"
+                SubTabLabel.TextSize = 14 -- Возвращаем дефолтный шрифт неактивному
                 ActiveLine.Visible = false
                 SubTabFrame.Visible = false
             end
