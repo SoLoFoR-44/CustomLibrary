@@ -4051,176 +4051,170 @@ function Library:CreateWindow(...)
                 Tab.RightSide.Visible = false
 
                 Tab.SubTabSelectorOuter = Library:Create("Frame", {
-                    BackgroundColor3 = Library.BackgroundColor,
-                    BorderColor3 = Library.OutlineColor,
-                    BorderMode = Enum.BorderMode.Inset,
+                    BackgroundTransparency = 1,
                     Position = UDim2.new(0, 8, 0, 8),
-                    Size = UDim2.new(0.25, -12, 0, 509),
+                    Size = UDim2.new(0.12, 0, 0, 509), 
                     ZIndex = 2,
                     Parent = TabFrame,
                 })
-
-                Tab.SubTabSelectorInner = Library:Create("Frame", {
-                    BackgroundColor3 = Library.BackgroundColor,
-                    BorderColor3 = Color3.new(0, 0, 0),
-                    Size = UDim2.new(1, -2, 1, -2),
-                    Position = UDim2.new(0, 1, 0, 1),
-                    ZIndex = 3,
-                    Parent = Tab.SubTabSelectorOuter,
-                })
-
-                Library:AddToRegistry(Tab.SubTabSelectorOuter, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
-                Library:AddToRegistry(Tab.SubTabSelectorInner, { BackgroundColor3 = "BackgroundColor" })
 
                 Library:Create("UIListLayout", {
                     FillDirection = Enum.FillDirection.Vertical,
                     SortOrder = Enum.SortOrder.LayoutOrder,
-                    Parent = Tab.SubTabSelectorInner,
+                    Padding = UDim.new(0, 4),
+                    Parent = Tab.SubTabSelectorOuter,
                 })
 
                 Tab.SubTabContent = Library:Create("Frame", {
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.25, 4, 0, 8),
-                    Size = UDim2.new(0.75, -12, 0, 509),
+                    Position = UDim2.new(0.12, 12, 0, 8),
+                    Size = UDim2.new(0.88, -20, 0, 509),
                     ZIndex = 2,
                     Parent = TabFrame,
                 })
             end
-		
-		    local SubTab = {
- 		       Groupboxes = {},
- 		       Tabboxes = {}
- 		    }
-		
- 		    local SubTabButton = Library:Create("Frame", {
- 		        BackgroundColor3 = Library.MainColor,
- 		        BorderColor3 = Library.OutlineColor,
- 		        BorderMode = Enum.BorderMode.Middle,
- 		        Size = UDim2.new(1, 0, 0, 25),
- 		        ZIndex = 4,
- 		        Parent = Tab.SubTabSelectorInner,
- 		    })
-		
- 		    Library:AddToRegistry(SubTabButton, { BackgroundColor3 = "MainColor", BorderColor3 = "OutlineColor" })
-		
- 		    local SubTabLabel = Library:CreateLabel({
- 		        Size = UDim2.new(1, 0, 1, 0),
- 		        TextSize = 14,
- 		        Text = Name,
- 		        ZIndex = 5,
- 		        Parent = SubTabButton,
- 		    })
-		
- 		    Library:AddToRegistry(SubTabLabel, { TextColor3 = "FontColorDark" })
-		
- 		    local SubTabFrame = Library:Create("Frame", {
- 		        BackgroundTransparency = 1,
- 		        Size = UDim2.new(1, 0, 1, 0),
- 		        Visible = false,
- 		        ZIndex = 2,
- 		        Parent = Tab.SubTabContent,
- 		    })
-		
- 		    local LeftSide = Library:Create("ScrollingFrame", {
- 		        BackgroundTransparency = 1,
- 		        BorderSizePixel = 0,
- 		        Position = UDim2.new(0, 0, 0, 0),
- 		        Size = UDim2.new(0.5, -4, 1, 0),
- 		        CanvasSize = UDim2.new(0, 0, 0, 0),
- 		        ScrollBarThickness = 0,
- 		        ZIndex = 2,
- 		        Parent = SubTabFrame,
- 		    })
-		
- 		    local RightSide = Library:Create("ScrollingFrame", {
- 		        BackgroundTransparency = 1,
- 		        BorderSizePixel = 0,
- 		        Position = UDim2.new(0.5, 4, 0, 0),
- 		        Size = UDim2.new(0.5, -4, 1, 0),
- 		        CanvasSize = UDim2.new(0, 0, 0, 0),
- 		        ScrollBarThickness = 0,
- 		        ZIndex = 2,
- 		        Parent = SubTabFrame,
- 		    })
-		
- 		    SubTab.LeftSide = LeftSide
- 		    SubTab.RightSide = RightSide
- 		    SubTab.MiddleSide = RightSide 
-		
- 		    Library:Create("UIListLayout", { Padding = UDim.new(0, 8), FillDirection = Enum.FillDirection.Vertical, HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = LeftSide })
- 		    Library:Create("UIListLayout", { Padding = UDim.new(0, 8), FillDirection = Enum.FillDirection.Vertical, HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = RightSide })
-		
- 		    for _, Side in next, { LeftSide, RightSide } do
- 		        Side:WaitForChild("UIListLayout"):GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
- 		            Side.CanvasSize = UDim2.fromOffset(0, Side.UIListLayout.AbsoluteContentSize.Y)
- 		        end)
- 		    end
-		
- 		    function SubTab:Show()
- 		        for _, other in next, Tab.SubTabs do
- 		            other:Hide()
- 		        end
- 		        SubTabLabel.TextColor3 = Library.AccentColor
- 		        Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "AccentColor"
- 		        SubTabButton.BackgroundColor3 = Library.BackgroundColor
- 		        Library.RegistryMap[SubTabButton].Properties.BackgroundColor3 = "BackgroundColor"
- 		        SubTabFrame.Visible = true
- 		    end
-		
- 		    function SubTab:Hide()
- 		        SubTabLabel.TextColor3 = Library.FontColorDark
- 		        Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "FontColorDark"
- 		        SubTabButton.BackgroundColor3 = Library.MainColor
- 		        Library.RegistryMap[SubTabButton].Properties.BackgroundColor3 = "MainColor"
- 		        SubTabFrame.Visible = false
- 		    end
-		
-  		    SubTabButton.InputBegan:Connect(function(Input)
-  		        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-   		            SubTab:Show()
-   		        end
-   		    end)
-            -- 
+
+            local SubTab = {
+                Groupboxes = {},
+                Tabboxes = {}
+            }
+
+            local SubTabButton = Library:Create("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 22),
+                ZIndex = 4,
+                Parent = Tab.SubTabSelectorOuter,
+            })
+
+            local ActiveLine = Library:Create("Frame", {
+                BackgroundColor3 = Library.AccentColor,
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -2, 0, 2),
+                Size = UDim2.new(0, 2, 1, -4),
+                Visible = false,
+                ZIndex = 5,
+                Parent = SubTabButton,
+            })
+            Library:AddToRegistry(ActiveLine, { BackgroundColor3 = "AccentColor" })
+
+            local SubTabLabel = Library:CreateLabel({
+                Position = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.new(1, -8, 1, 0),
+                TextSize = 14,
+                Text = Name,
+                TextXAlignment = Enum.TextXAlignment.Right,
+                ZIndex = 5,
+                Parent = SubTabButton,
+            })
+            Library:AddToRegistry(SubTabLabel, { TextColor3 = "FontColorDark" })
+
+            local SubTabFrame = Library:Create("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Visible = false,
+                ZIndex = 2,
+                Parent = Tab.SubTabContent,
+            })
+
+            local LeftSide = Library:Create("ScrollingFrame", {
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.new(0.333, -5, 1, 0),
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 0,
+                ZIndex = 2,
+                Parent = SubTabFrame,
+            })
+
+            local MiddleSide = Library:Create("ScrollingFrame", {
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.333, 2, 0, 0),
+                Size = UDim2.new(0.333, -5, 1, 0),
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 0,
+                ZIndex = 2,
+                Parent = SubTabFrame,
+            })
+
+            local RightSide = Library:Create("ScrollingFrame", {
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.666, 4, 0, 0),
+                Size = UDim2.new(0.333, -5, 1, 0),
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 0,
+                ZIndex = 2,
+                Parent = SubTabFrame,
+            })
+    
+            SubTab.LeftSide = LeftSide
+            SubTab.MiddleSide = MiddleSide
+            SubTab.RightSide = RightSide
+    
+            Library:Create("UIListLayout", { Padding = UDim.new(0, 8), FillDirection = Enum.FillDirection.Vertical, HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = LeftSide })
+            Library:Create("UIListLayout", { Padding = UDim.new(0, 8), FillDirection = Enum.FillDirection.Vertical, HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = MiddleSide })
+            Library:Create("UIListLayout", { Padding = UDim.new(0, 8), FillDirection = Enum.FillDirection.Vertical, HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = RightSide })
+    
+            for _, Side in next, { LeftSide, MiddleSide, RightSide } do
+                Side:WaitForChild("UIListLayout"):GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    Side.CanvasSize = UDim2.fromOffset(0, Side.UIListLayout.AbsoluteContentSize.Y)
+                end)
+            end
+    
+            function SubTab:Show()
+                for _, other in next, Tab.SubTabs do
+                    other:Hide()
+                end
+
+                SubTabLabel.TextColor3 = Library.AccentColor
+                Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "AccentColor"
+                ActiveLine.Visible = true 
+                SubTabFrame.Visible = true
+            end
+
+            function SubTab:Hide()
+                SubTabLabel.TextColor3 = Library.FontColorDark
+                Library.RegistryMap[SubTabLabel].Properties.TextColor3 = "FontColorDark"
+                ActiveLine.Visible = false
+                SubTabFrame.Visible = false
+            end
+    
+            SubTabButton.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    SubTab:Show()
+                end
+            end)
+    
             function SubTab:AddGroupbox(Info)
                 local groupbox = Tab.AddGroupbox(self, Info)
                 SubTab.Groupboxes[Info.Name] = groupbox
                 return groupbox
             end
-
-            function SubTab:AddLeftGroupbox(Name)
-                return self:AddGroupbox({ Side = 1, Name = Name })
-            end
-
-            function SubTab:AddRightGroupbox(Name)
-                return self:AddGroupbox({ Side = 3, Name = Name })
-            end
-
-            function SubTab:AddMiddleGroupbox(Name)
-                return self:AddGroupbox({ Side = 3, Name = Name })
-            end
-
+    
+            function SubTab:AddLeftGroupbox(Name) return self:AddGroupbox({ Side = 1, Name = Name }) end
+            function SubTab:AddMiddleGroupbox(Name) return self:AddGroupbox({ Side = 2, Name = Name }) end
+            function SubTab:AddRightGroupbox(Name) return self:AddGroupbox({ Side = 3, Name = Name }) end
+    
             function SubTab:AddTabbox(Info)
                 local tabbox = Tab.AddTabbox(self, Info)
                 SubTab.Tabboxes[Info.Name or ""] = tabbox
                 return tabbox
             end
-
-            function SubTab:AddLeftTabbox(Name)
-                return self:AddTabbox({ Name = Name, Side = 1 })
-            end
-
-            function SubTab:AddRightTabbox(Name)
-                return self:AddTabbox({ Name = Name, Side = 3 })
-            end
-
-            table.insert(Tab.SubTabs, SubTab)
     
+            function SubTab:AddLeftTabbox(Name) return self:AddTabbox({ Name = Name, Side = 1 }) end
+            function SubTab:AddMiddleTabbox(Name) return self:AddTabbox({ Name = Name, Side = 2 }) end
+            function SubTab:AddRightTabbox(Name) return self:AddTabbox({ Name = Name, Side = 3 }) end
+    
+            table.insert(Tab.SubTabs, SubTab)
+            
             if #Tab.SubTabs == 1 then
                 SubTab:Show()
             end
-		
-  		    return SubTab
-		end
+
+            return SubTab
+        end
 
 		TabButton.InputBegan:Connect(function(Input)
 			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
