@@ -4180,19 +4180,44 @@ function Library:CreateWindow(...)
    		            SubTab:Show()
    		        end
    		    end)
+            -- 
+            function SubTab:AddGroupbox(Info)
+                local groupbox = Tab.AddGroupbox(self, Info)
+                SubTab.Groupboxes[Info.Name] = groupbox
+                return groupbox
+            end
 
-  		    SubTab.AddGroupbox = Tab.AddGroupbox
-  		    SubTab.AddLeftGroupbox = Tab.AddLeftGroupbox
-  		    SubTab.AddRightGroupbox = Tab.AddRightGroupbox
-  		    SubTab.AddTabbox = Tab.AddTabbox
-  		    SubTab.AddLeftTabbox = Tab.AddLeftTabbox
-  		    SubTab.AddRightTabbox = Tab.AddRightTabbox
+            function SubTab:AddLeftGroupbox(Name)
+                return self:AddGroupbox({ Side = 1, Name = Name })
+            end
 
-  		    table.insert(Tab.SubTabs, SubTab)
+            function SubTab:AddRightGroupbox(Name)
+                return self:AddGroupbox({ Side = 3, Name = Name })
+            end
+
+            function SubTab:AddMiddleGroupbox(Name)
+                return self:AddGroupbox({ Side = 3, Name = Name })
+            end
+
+            function SubTab:AddTabbox(Info)
+                local tabbox = Tab.AddTabbox(self, Info)
+                SubTab.Tabboxes[Info.Name or ""] = tabbox
+                return tabbox
+            end
+
+            function SubTab:AddLeftTabbox(Name)
+                return self:AddTabbox({ Name = Name, Side = 1 })
+            end
+
+            function SubTab:AddRightTabbox(Name)
+                return self:AddTabbox({ Name = Name, Side = 3 })
+            end
+
+            table.insert(Tab.SubTabs, SubTab)
     
-  		    if #Tab.SubTabs == 1 then
-  		        SubTab:Show()
-  		    end
+            if #Tab.SubTabs == 1 then
+                SubTab:Show()
+            end
 		
   		    return SubTab
 		end
