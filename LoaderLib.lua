@@ -47,11 +47,11 @@ end
 
 function LoaderLibrary:CreateWindow(Options)
 	Options = Options or {}
-	local Gui_Name = Options.Gui_Name or "LoaderUI"
-	local Title = Options.Title or "Loader"
-	local Icon_Id = Options.Icon_Id or "rbxassetid://12702460854"
-	local Expires = Options.Expires or "Never"
-	local Last_Update = Options.Last_Update or "???"
+	local Gui_Name = Options.Gui_Name
+	local Title = Options.Title
+	local Icon_Id = Options.Icon_Id
+	local Expires = Options.Expires
+	local Last_Update = Options.Last_Update
 	local On_Load = Options.On_Load or function() end
 
 	local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
