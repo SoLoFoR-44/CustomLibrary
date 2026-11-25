@@ -240,22 +240,36 @@ function LoaderLibrary:CreateWindow(Options)
 		BorderSizePixel = 0,
 	}, Changelog_Panel)
 
-	local Changelog_Scroll = Create_Instance("ScrollingFrame", {
+local Changelog_Scroll = Create_Instance("ScrollingFrame", {
 		Name = "Changelog_Scroll",
-		Size = UDim2.new(1, -18, 1, -44),
-		Position = UDim2.fromOffset(12, 40),
+		Size = UDim2.new(1, -14, 1, -44),
+		Position = UDim2.fromOffset(10, 40),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromOffset(0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		ScrollBarThickness = 2,
+		ScrollBarThickness = 3,
 		ScrollBarImageColor3 = Theme.Scroll_Bar,
+		ScrollBarImageTransparency = 0.15,
 		ScrollingDirection = Enum.ScrollingDirection.Y,
+		TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+		BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
 	}, Changelog_Panel)
+
+	Create_Instance("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, Changelog_Scroll)
+
+	Create_Instance("UIPadding", {
+		PaddingTop = UDim.new(0, 2),
+		PaddingBottom = UDim.new(0, 6),
+		PaddingRight = UDim.new(0, 8),
+		PaddingLeft = UDim.new(0, 2),
+	}, Changelog_Scroll)
 
 	local Changelog_Text = Create_Instance("TextLabel", {
 		Name = "Changelog_Text",
-		Size = UDim2.new(1, -6, 0, 0),
+		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		Text = "",
@@ -377,6 +391,7 @@ function LoaderLibrary:CreateWindow(Options)
 		Selected_Index = Index
 		Selected_Title.Text = Product.Name
 		Changelog_Text.Text = Product.Changelog or ""
+		Changelog_Scroll.CanvasPosition = Vector2.new(0, 0)
 
 		for Item_Index, Ref in ipairs(Card_Refs) do
 			local Is_Selected = (Item_Index == Index)
